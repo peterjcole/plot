@@ -10,12 +10,14 @@
               :key="activity.id"
               :activity="activity"
               :index="index"
+              :selected="isSelected(activity)"
+              @select-activity="selectActivity"
             />
           </div>
         </div>
         <div class="column">
           <div class="box">
-            <div id="map" />
+            <Map :activity="selectedActivity" />
           </div>
         </div>
       </div>
@@ -27,40 +29,59 @@
 import axios from 'axios'
 
 import Activity from '../components/Activity'
+import Map from '../components/Map'
 
 export default {
-
   components: {
-    Activity
+    Activity,
+    Map,
   },
   data: () => {
     return {
       accessToken: localStorage.token,
-      activities: null
+      activities: null,
+      selectedActivity: null,
     }
   },
 
   mounted() {
     this.getActivities()
   },
-
   methods: {
     getActivities() {
       const headers = {
-        'Authorization': `Bearer ${localStorage.token}`
+        Authorization: `Bearer ${localStorage.token}`,
       }
-      const result = axios.get('https://www.strava.com/api/v3/athlete/activities?per_page=30', { headers }).then(res => {
-        this.activities = res
-      })
-
-    }
-  }
+      axios
+        .get('https://www.strava.com/api/v3/athlete/activities?per_page=30', { headers })
+        .then((res) => {
+          this.activities = res
+        })
+    },
+    selectActivity(id) {
+      const headers = {
+        Authorization: `Bearer ${localStorage.token}`,
+      }
+      axios
+        .get(
+          `https://www.strava.com/api/v3/activities/${id}/streams?keys=latlng,id&key_by_type=true`,
+          { headers }
+        )
+        .then((result) => {
+          this.selectedActivity = { ...result.data, id }
+        })
+    },
+    isSelected(activity) {
+      return activity && this.selectedActivity && activity.id === this.selectedActivity.id
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .box {
   height: 75vh;
+
   &.activity-list {
     overflow: scroll;
   }

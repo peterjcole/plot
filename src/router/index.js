@@ -12,8 +12,8 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: {
-      requiresAuth: false
-    }
+      requiresAuth: false,
+    },
   },
   {
     path: '/about',
@@ -23,8 +23,8 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
     meta: {
-      requiresAuth: false
-    }
+      requiresAuth: false,
+    },
   },
   {
     path: '/login',
@@ -39,27 +39,30 @@ const routes = [
       window.location.replace(stravaUrl)
     },
     meta: {
-      requiresAuth: false
-    }
+      requiresAuth: false,
+    },
   },
   {
     path: '/redirect',
     beforeEnter: (to, from, next) => {
       const { code } = to.query
-      axios.post('/api/token', {
-        code,
-      }).then(res => {
-        localStorage.token = res.data.access_token
-        localStorage.tokenExpiry = res.data.expires_at
-        next('/activities')
-      }).catch(err => {
-        console.log(err)
-        next('/login')
-      })
+      axios
+        .post('/api/token', {
+          code,
+        })
+        .then((res) => {
+          localStorage.token = res.data.access_token
+          localStorage.tokenExpiry = res.data.expires_at
+          next('/activities')
+        })
+        .catch((err) => {
+          console.log(err)
+          next('/login')
+        })
     },
     meta: {
-      requiresAuth: false
-    }
+      requiresAuth: false,
+    },
   },
   {
     path: '/activities',
@@ -69,8 +72,8 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/Activities.vue'),
     meta: {
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
 ]
 
@@ -81,8 +84,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth === true)) {
-    const isAuthenticated = localStorage.tokenExpiry > (Date.now() / 1000)
+  if (to.matched.some((record) => record.meta.requiresAuth === true)) {
+    const isAuthenticated = localStorage.tokenExpiry > Date.now() / 1000
     isAuthenticated ? next() : next('/login')
   }
   next()

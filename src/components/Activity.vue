@@ -3,18 +3,18 @@
     <hr v-if="notFirst" />
 
     <div class="activity">
-      <button v-on:click="selectActivity">
+      <button @click="selectActivity">
         <div class="media">
           <div class="media-content">
             <div class="content">
               <p>
-                <strong>{{activity.name}}</strong>
+                <strong>{{ activity.name }}</strong>
                 <br />
-                <small>{{`${activity.start_date_local}`}}</small>
+                <small>{{ `${activity.start_date_local}` }}</small>
                 <br />
-                <small>{{`${activity.distance}m`}}</small>
+                <small>{{ `${activity.distance}m` }}</small>
                 <br />
-                {{activity.location_country}}
+                {{ activity.location_country }}
               </p>
             </div>
           </div>
@@ -29,23 +29,23 @@ export default {
   props: {
     activity: {
       type: Object,
-      required: true
+      required: true,
     },
     index: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     notFirst() {
       return this.index !== 0
-    }
+    },
   },
   methods: {
     selectActivity() {
       this.$emit('select-activity', this.activity.id)
-    }
-  }
+    },
+  },
 }
 </script>
 

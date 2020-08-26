@@ -13,10 +13,13 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/vue-fontawesome": "^0.1.10",
+    "@turf/turf": "^5.1.6",
     "axios": "^0.20.0",
     "bulma": "^0.9.0",
     "core-js": "^3.6.5",
+    "leaflet": "^1.6.0",
     "node-fetch": "^2.6.0",
+    "proj4leaflet": "^1.0.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },
@@ -31,7 +34,13 @@
     "@vue/test-utils": "^1.0.3",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^6.2.2",
     "sass": "^1.26.10",
     "sass-loader": "^10.0.1",
@@ -44,7 +53,8 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "plugin:vue/recommended"
+      "plugin:vue/recommended",
+      "eslint:recommended"
     ],
     "parserOptions": {
       "parser": "babel-eslint"
@@ -74,5 +84,9 @@
   ],
   "jest": {
     "preset": "@vue/cli-plugin-unit-jest"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
   }
 }
