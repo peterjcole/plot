@@ -11,6 +11,9 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: {
+      requiresAuth: false
+    }
   },
   {
     path: '/about',
@@ -19,10 +22,14 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    meta: {
+      requiresAuth: false
+    }
   },
   {
     path: '/login',
     beforeEnter: () => {
+      console.log('wuh')
       const stravaUrl = new URL('https://www.strava.com/oauth/authorize')
       stravaUrl.searchParams.append('client_id', process.env.VUE_APP_STRAVA_CLIENT_ID)
       stravaUrl.searchParams.append('redirect_uri', `${window.location.origin}/redirect`)
@@ -31,6 +38,9 @@ const routes = [
       stravaUrl.searchParams.append('approval_prompt', 'auto')
       window.location.replace(stravaUrl)
     },
+    meta: {
+      requiresAuth: false
+    }
   },
   {
     path: '/redirect',
@@ -47,6 +57,9 @@ const routes = [
         next('/login')
       })
     },
+    meta: {
+      requiresAuth: false
+    }
   },
   {
     path: '/activities',
@@ -55,6 +68,9 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/Activities.vue'),
+    meta: {
+      requiresAuth: true
+    }
   },
 ]
 
@@ -65,12 +81,11 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.tokenExpiry > (Date.now() / 1000)
-  if (isAuthenticated) {
-    next()
-  } else {
-    next('/login')
+  if (to.matched.some(record => record.meta.requiresAuth === true)) {
+    const isAuthenticated = localStorage.tokenExpiry > (Date.now() / 1000)
+    isAuthenticated ? next() : next('/login')
   }
+  next()
 })
 
 export default router
