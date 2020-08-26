@@ -38,19 +38,24 @@ export default {
   },
   data: () => {
     return {
-      accessToken: localStorage.token,
-      activities: null,
-      selectedActivity: null,
+      activities: { data: [] },
+      selectedActivity: {},
     }
   },
-
+  computed: {
+    token() {
+      return localStorage.getItem('token')
+    },
+  },
   mounted() {
     this.getActivities()
   },
   methods: {
     getActivities() {
+      // eslint-disable-next-line no-debugger
+      // debugger
       const headers = {
-        Authorization: `Bearer ${localStorage.token}`,
+        Authorization: `Bearer ${this.token}`,
       }
       axios
         .get('https://www.strava.com/api/v3/athlete/activities?per_page=30', { headers })
@@ -60,7 +65,7 @@ export default {
     },
     selectActivity(id) {
       const headers = {
-        Authorization: `Bearer ${localStorage.token}`,
+        Authorization: `Bearer ${this.token}`,
       }
       axios
         .get(
@@ -81,7 +86,7 @@ export default {
 <style lang="scss" scoped>
 .box {
   height: 75vh;
-
+  padding: 0.75rem;
   &.activity-list {
     overflow: scroll;
   }

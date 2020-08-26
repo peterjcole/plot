@@ -21,9 +21,7 @@ module.exports = async (req, res) => {
     body: urlencoded,
     redirect: 'follow',
   }
-  console.log(requestOptions)
   const response = await fetch(tokenUrl, requestOptions)
-  console.log(response)
   const json = await response.json()
   res.status(response.status).json(json)
 }

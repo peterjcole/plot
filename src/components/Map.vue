@@ -5,6 +5,7 @@
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+// eslint-disable-next-line no-unused-vars
 import p4l from 'proj4leaflet' // required for L.Proj.CRS
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
@@ -23,14 +24,16 @@ export default {
   },
   watch: {
     activity() {
-      const data = turf.lineString(this.activity.latlng.data)
-      const bbox = turf.bbox(turf.transformScale(data, 10))
+      if (this.activity) {
+        const data = turf.lineString(this.activity.latlng.data)
+        const bbox = turf.bbox(turf.transformScale(data, 10))
 
-      const zoomBounds = L.latLngBounds(this.activity.latlng.data)
-      const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
+        const zoomBounds = L.latLngBounds(this.activity.latlng.data)
+        const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
 
-      this.setupTiles(zoomBounds, tileBounds)
-      L.geoJSON(turf.flip(data)).addTo(this.map)
+        this.setupTiles(zoomBounds, tileBounds)
+        L.geoJSON(turf.flip(data)).addTo(this.map)
+      }
     },
   },
   methods: {
