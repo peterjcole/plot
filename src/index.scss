@@ -2,3 +2,9 @@
 $hr-margin: 0.5rem;
 
 @import '~bulma/bulma.sass';
+
+.section-padding-mobile {
+  @include mobile() {
+    padding: 3rem 0.5rem;
+  }
+}

@@ -1,28 +1,36 @@
 <template>
-  <section class="section">
-    <div class="container">
-      <h1 class="title is-1">Activities</h1>
-      <div class="columns">
-        <div class="column is-one-quarter">
-          <div class="box activity-list">
-            <Activity
-              v-for="(activity, index) in activities.data"
-              :key="activity.id"
-              :activity="activity"
-              :index="index"
-              :selected="isSelected(activity)"
-              @select-activity="selectActivity"
-            />
+  <div>
+    <section class="section section-padding-mobile">
+      <section class="hero">
+        <div class="hero-body">
+          <div class="container">
+            <h1 class="title is-1">Activities</h1>
           </div>
         </div>
-        <div class="column">
-          <div class="box">
-            <Map :activity="selectedActivity" />
+      </section>
+      <div class="container">
+        <div class="columns">
+          <div class="column is-one-quarter">
+            <div class="box activity-list">
+              <Activity
+                v-for="(activity, index) in activities.data"
+                :key="activity.id"
+                :activity="activity"
+                :index="index"
+                :selected="isSelected(activity)"
+                @select-activity="selectActivity"
+              />
+            </div>
+          </div>
+          <div class="column">
+            <div class="box">
+              <Map :activity="selectedActivity" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <script>
@@ -58,7 +66,7 @@ export default {
         Authorization: `Bearer ${this.token}`,
       }
       axios
-        .get('https://www.strava.com/api/v3/athlete/activities?per_page=30', { headers })
+        .get('https://www.strava.com/api/v3/athlete/activities?per_page=50', { headers })
         .then((res) => {
           this.activities = res
         })
@@ -75,6 +83,8 @@ export default {
         .then((result) => {
           this.selectedActivity = { ...result.data, id }
         })
+
+      document.getElementById('map').scrollIntoView()
     },
     isSelected(activity) {
       return activity && this.selectedActivity && activity.id === this.selectedActivity.id
@@ -87,8 +97,10 @@ export default {
 .box {
   height: 75vh;
   padding: 0.75rem;
+
   &.activity-list {
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: scroll;
   }
 }
 </style>

@@ -1,22 +1,11 @@
 <template>
   <div>
     <hr v-if="notFirst" />
-
     <div class="activity">
       <button @click="selectActivity">
         <div class="media">
           <div class="media-content">
-            <div class="content">
-              <p>
-                <strong>{{ activity.name }}</strong>
-                <br />
-                <small>{{ `${activity.start_date_local}` }}</small>
-                <br />
-                <small>{{ `${activity.distance}m` }}</small>
-                <br />
-                {{ activity.location_country }}
-              </p>
-            </div>
+            <ActivityContent :activity="activity" />
           </div>
         </div>
       </button>
@@ -25,7 +14,10 @@
 </template>
 
 <script>
+import ActivityContent from '@/components/ActivityContent'
+
 export default {
+  components: { ActivityContent },
   props: {
     activity: {
       type: Object,

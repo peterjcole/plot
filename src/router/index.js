@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 
 import Home from '../views/Home.vue'
-import {store, mutations} from '../store'
+import { store, mutations } from '@/store'
 
 Vue.use(VueRouter)
 
@@ -14,7 +14,7 @@ const routes = [
     component: Home,
     meta: {
       requiresAuth: false,
-    }
+    },
   },
   {
     path: '/login',
@@ -87,7 +87,7 @@ router.beforeEach((to, from, next) => {
     // eslint-disable-next-line no-debugger
     // debugger
     const isAuthenticated = store.tokenExpiry > Date.now() / 1000
-    isAuthenticated ? next() : next('/login')
+    isAuthenticated ? next() : next('/about')
   }
   next()
 })
