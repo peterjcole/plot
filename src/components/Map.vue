@@ -24,16 +24,7 @@ export default {
   },
   watch: {
     activity() {
-      if (this.activity) {
-        const data = turf.lineString(this.activity.latlng.data)
-        const bbox = turf.bbox(turf.transformScale(data, 10))
-
-        const zoomBounds = L.latLngBounds(this.activity.latlng.data)
-        const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
-
-        this.setupTiles(zoomBounds, tileBounds)
-        L.geoJSON(turf.flip(data)).addTo(this.map)
-      }
+      this.plotActivity()
     },
   },
   methods: {
@@ -64,6 +55,7 @@ export default {
       )
 
       this.setupTiles(startBounds, startBounds)
+      this.plotActivity()
     },
     setupTiles(tileBounds, zoomBounds) {
       this.map.eachLayer((layer) => this.map.removeLayer(layer))
@@ -78,7 +70,21 @@ export default {
       L.tileLayer(mapsApiUrl, tileOptions).addTo(this.map)
 
       this.map.fitBounds(zoomBounds)
+
+
     },
+    plotActivity() {
+      if (this.activity && this.activity.latlng && this.activity.latlng.data.length > 0) {
+        const data = turf.lineString(this.activity.latlng.data)
+        const bbox = turf.bbox(turf.transformScale(data, 10))
+
+        const zoomBounds = L.latLngBounds(this.activity.latlng.data)
+        const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
+
+        this.setupTiles(zoomBounds, tileBounds)
+        L.geoJSON(turf.flip(data)).addTo(this.map)
+      }
+    }
   },
 }
 </script>
@@ -86,5 +92,6 @@ export default {
 <style lang="scss" scoped>
 #map {
   height: 100%;
+  z-index: 0;
 }
 </style>

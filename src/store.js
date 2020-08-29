@@ -3,6 +3,7 @@ import Vue from 'vue'
 export const store = Vue.observable({
   token: '',
   tokenExpiry: '',
+  sharedDocSnapshot: {}
 })
 
 export const mutations = {
@@ -11,7 +12,6 @@ export const mutations = {
     store.tokenExpiry = tokenExpiry
     window.localStorage.setItem('token', token)
     window.localStorage.setItem('tokenExpiry', tokenExpiry)
-
   },
   retrieveTokenFromLocalStorage() {
     if (!store.token || !store.tokenExpiry) {
@@ -24,4 +24,7 @@ export const mutations = {
     window.localStorage.removeItem('token')
     window.localStorage.removeItem('tokenExpiry')
   },
+  setSharedDocSnapshot(sharedDocSnapshot) {
+    store.sharedDocSnapshot = sharedDocSnapshot
+  }
 }

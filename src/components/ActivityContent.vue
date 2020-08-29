@@ -1,10 +1,17 @@
-iuy 2234576
 <template>
-  <div class="content">
+  <div
+    class="content"
+    :class="{ selected: selected }"
+    tabindex="0"
+    @keydown="selectActivity"
+    @mousedown="selectActivity"
+  >
     <p>
       <strong>
-        <span>{{ activity.name }}</span>
-        <span class="icon"> <font-awesome-icon v-if="activityIcon" :icon="activityIcon" /> </span>
+        <span class="activity-name">{{ activity.name }}</span>
+        <span class="icon">
+          <font-awesome-icon v-if="activityIcon" :icon="activityIcon" />
+        </span>
       </strong>
       <br />
       <small>
@@ -28,6 +35,10 @@ export default {
       type: Object,
       required: true,
     },
+    selected: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     distanceInKms() {
@@ -40,17 +51,48 @@ export default {
       }[this.activity.type]
     },
   },
+  methods: {
+    selectActivity(e) {
+      if (e.keyCode == 32 || e.type === 'mousedown') {
+        e.preventDefault()
+        this.$emit('select-activity', this.activity.id)
+      }
+    },
+    // cancelOutline(e) {
+    // }
+  },
 }
 </script>
 <style lang="scss" scoped>
-button {
-  all: unset;
-  padding: 10px;
+.content {
+  border-radius: 5px;
+
+  &:hover {
+    background-color: whitesmoke;
+  }
+
+  &:active {
+    background-color: lightgrey;
+    outline-color: darkgrey;
+  }
+
+  &:focus {
+    outline-color: darkgrey;
+  }
+
+  &.selected {
+    background-color: whitesmoke;
+  }
+
+  padding: 10px 10px 10px 15px;
 }
 
 .icon {
-  padding-left: 3px;
   position: relative;
   top: 2px;
+}
+
+.activity-name {
+  padding-right: 3px;
 }
 </style>

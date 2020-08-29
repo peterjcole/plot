@@ -1,10 +1,11 @@
 // Change variables here
 $hr-margin: 0.5rem;
+$navbar-breakpoint: 0;
 
 @import '~bulma/bulma.sass';
 
 .section-padding-mobile {
   @include mobile() {
-    padding: 3rem 0.5rem;
+    padding: 0rem 0.5rem;
   }
 }

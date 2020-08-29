@@ -2,8 +2,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 
-import Home from '../views/Home.vue'
-import { store, mutations } from '@/store'
+import Home from '../views/Home'
+import SharedActivity from '../views/SharedActivity'
+import {store, mutations} from '@/store'
+import {dbAuth, db} from '@/db'
 
 Vue.use(VueRouter)
 
@@ -44,7 +46,7 @@ const routes = [
   {
     path: '/redirect',
     beforeEnter: (to, from, next) => {
-      const { code } = to.query
+      const {code} = to.query
       axios
         .post('/api/token', {
           code,
@@ -73,6 +75,34 @@ const routes = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/activity/:id',
+    name: 'Shared Activity',
+    component: SharedActivity,
+    meta: {
+      requiresAuth: false,
+    },
+    beforeEnter: (to, from, next) => {
+      db.collection('activities')
+        .doc(to.params.id)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            mutations.setSharedDocSnapshot(doc)
+            next()
+          } else {
+            next('/')
+          }
+        }).catch(() => next('/'))
+    },
+
+    props: () => {
+      return {
+        activity: store.sharedDocSnapshot.data(),
+        activitySnapshot: store.sharedDocSnapshot
+      }
+    },
+  },
 ]
 
 const router = new VueRouter({
@@ -82,6 +112,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  dbAuth.signInAnonymously()
+
   if (to.matched.some((record) => record.meta.requiresAuth === true)) {
     mutations.retrieveTokenFromLocalStorage()
     // eslint-disable-next-line no-debugger

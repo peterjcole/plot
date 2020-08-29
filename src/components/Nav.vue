@@ -9,23 +9,12 @@
       </a>
     </div>
 
-    <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-menu is-active">
       <div class="navbar-start">
         <router-link class="navbar-item" to="/about">Home</router-link>
         <router-link class="navbar-item" to="/">Activities</router-link>
       </div>
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <router-link v-if="!isAuthenticated" class="button is-primary" to="/login">
-              <strong>Login</strong>
-            </router-link>
-            <router-link v-else class="button is-primary" to="/logout">
-              <strong>Log Out</strong>
-            </router-link>
-          </div>
-        </div>
-      </div>
+
     </div>
   </nav>
 </template>

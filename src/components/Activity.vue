@@ -1,23 +1,40 @@
 <template>
   <div>
     <hr v-if="notFirst" />
-    <div class="activity">
-      <button @click="selectActivity">
-        <div class="media">
-          <div class="media-content">
-            <ActivityContent :activity="activity" />
+    <div>
+      <div class="media">
+        <div class="media-content" @click.self="selectActivity">
+          <ActivityContent :activity="activity" :selected="selected" v-on="$listeners" />
+        </div>
+        <div class="media-right">
+          <div class="content">
+            <button
+              class="button is-small is-light"
+              v-on:click="$emit('share-activity', activity.id, index)"
+            >
+              <span class="icon">
+                <font-awesome-icon icon="share-alt" />
+              </span>
+            </button>
           </div>
         </div>
-      </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 import ActivityContent from '@/components/ActivityContent'
 
 export default {
-  components: { ActivityContent },
+  data() {
+    return {
+      activityId: null,
+    }
+  },
+  components: { ActivityContent, FontAwesomeIcon },
   props: {
     activity: {
       type: Object,
@@ -27,35 +44,21 @@ export default {
       type: Number,
       required: true,
     },
+    selected: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     notFirst() {
       return this.index !== 0
     },
   },
-  methods: {
-    selectActivity() {
-      this.$emit('select-activity', this.activity.id)
-    },
-  },
 }
 </script>
 
 <style lang="scss" scoped>
-button {
-  all: unset;
-  padding: 10px;
-}
-
-.activity {
-  border-radius: 5px;
-
-  &:hover {
-    background-color: whitesmoke;
-  }
-
-  &:active {
-    background-color: lightgrey;
-  }
+.media-right {
+  padding: 10px 10px 10px 0px;
 }
 </style>
