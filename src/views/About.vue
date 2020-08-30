@@ -18,7 +18,7 @@
         <footer class="footer">
           <div class="content has-text-centered">
             <p>
-              <strong>Plot</strong> by <a href="https://github.com/peterjcole">Peter Cole</a>.
+              <span class="icon nudge-icon"><font-awesome-icon icon="map"/></span><strong>plot</strong> by <a href="https://github.com/peterjcole">Peter Cole</a> |
               <span class="icon nudge-icon"><font-awesome-icon :icon="['fab', 'github']"/></span>
               <a href="https://github.com/peterjcole/plot"
                 >Github project</a

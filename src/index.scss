@@ -22,8 +22,14 @@ $primary: #FC4C02;
     padding: 0.75rem;
 
     @include touch {
-      height: 90vh;
+      height: 83vh;
     }
+  }
+}
+
+.column.map {
+  @include touch {
+    padding-bottom: 0;
   }
 }
 

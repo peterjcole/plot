@@ -29,7 +29,7 @@
             </div>
           </nav>
         </div>
-        <div class="column">
+        <div class="column map">
           <div class="box map">
             <Map :activity="selectedActivity" />
           </div>
@@ -175,7 +175,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-//@import '~bulma/sass/utilities/mixins.sass';
-
 
 </style>

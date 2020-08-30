@@ -96,7 +96,7 @@ export default {
     plotActivity() {
       if (this.activityLoaded) {
         const data = turf.lineString(this.activity.latlng.data)
-        const bbox = turf.bbox(turf.transformScale(data, 6))
+        const bbox = turf.bbox(turf.transformScale(data, 10))
 
         const zoomBounds = L.latLngBounds(this.activity.latlng.data)
         const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
