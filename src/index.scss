@@ -12,3 +12,7 @@ $primary: #FC4C02;
     padding: 0rem 0.5rem;
   }
 }
+
+:export {
+  primaryColor: $primary;
+}

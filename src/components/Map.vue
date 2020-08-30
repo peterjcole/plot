@@ -13,6 +13,8 @@ import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fulls
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
+// import variables from '@/index.scss'
+
 export default {
   data() {
     return {
@@ -28,6 +30,11 @@ export default {
   watch: {
     activity() {
       this.plotActivity()
+    },
+  },
+  computed: {
+    activityLoaded() {
+      return this.activity && this.activity.latlng && this.activity.latlng.data.length > 0
     },
   },
   methods: {
@@ -53,20 +60,25 @@ export default {
 
       this.map = L.map('map', mapOptions)
 
+      if (!this.activityLoaded) {
+        this.setupStartTiles()
+      } else {
+        this.plotActivity()
+      }
+    },
+    setupStartTiles() {
+      const startZoomBounds = L.latLngBounds(
+        L.latLng(54.44259993088727, -2.9374139555606513),
+        L.latLng(54.416359041392084, -2.9817969157636037)
+      )
       const startBounds = L.latLngBounds(
         L.latLng(54.75474418589996, -2.557133753083287),
         L.latLng(54.0934435371236, -3.3719427214496935)
       )
-
-      const startZoomBounds = L.latLngBounds(
-        L.latLng( 54.44259993088727 -2.9374139555606513),
-        L.latLng(54.416359041392084, -2.9817969157636037)
-    )
+      window.map = this.map
 
       this.setupTiles(startBounds, startZoomBounds)
-      this.plotActivity()
     },
-
     setupTiles(tileBounds, zoomBounds) {
       this.map.eachLayer((layer) => this.map.removeLayer(layer))
 
@@ -80,10 +92,9 @@ export default {
       L.tileLayer(mapsApiUrl, tileOptions).addTo(this.map)
 
       this.map.fitBounds(zoomBounds)
-
     },
     plotActivity() {
-      if (this.activity && this.activity.latlng && this.activity.latlng.data.length > 0) {
+      if (this.activityLoaded) {
         const data = turf.lineString(this.activity.latlng.data)
         const bbox = turf.bbox(turf.transformScale(data, 6))
 
@@ -93,7 +104,7 @@ export default {
         this.setupTiles(tileBounds, zoomBounds)
         L.geoJSON(turf.flip(data)).addTo(this.map)
       }
-    }
+    },
   },
 }
 </script>
