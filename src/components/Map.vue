@@ -3,11 +3,11 @@
 </template>
 
 <script>
-import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.fullscreen/Control.FullScreen.css'
+import L from 'leaflet'
 // eslint-disable-next-line no-unused-vars
 import p4l from 'proj4leaflet' // required for L.Proj.CRS
-import 'leaflet.fullscreen/Control.FullScreen.css'
 // eslint-disable-next-line no-unused-vars
 import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fullscreen control
 import proj4 from 'proj4'
@@ -43,7 +43,7 @@ export default {
 
       const mapOptions = {
         crs: crs,
-        minZoom: 7,
+        minZoom: 6,
         maxZoom: 9,
         center: proj4('EPSG:27700', 'EPSG:4326', [337297, 503695]).reverse(),
         zoom: 7,
@@ -58,16 +58,22 @@ export default {
         L.latLng(54.0934435371236, -3.3719427214496935)
       )
 
-      this.setupTiles(startBounds, startBounds)
+      const startZoomBounds = L.latLngBounds(
+        L.latLng( 54.44259993088727 -2.9374139555606513),
+        L.latLng(54.416359041392084, -2.9817969157636037)
+    )
+
+      this.setupTiles(startBounds, startZoomBounds)
       this.plotActivity()
     },
+
     setupTiles(tileBounds, zoomBounds) {
       this.map.eachLayer((layer) => this.map.removeLayer(layer))
 
       const tileOptions = {
         maxNativeZoom: 9,
-        minNativeZoom: 7,
-        tileBounds,
+        minNativeZoom: 8,
+        bounds: tileBounds,
       }
       const mapsApiUrl = `/api/maps?y={y}&x={x}&z={z}`
 
@@ -75,17 +81,16 @@ export default {
 
       this.map.fitBounds(zoomBounds)
 
-
     },
     plotActivity() {
       if (this.activity && this.activity.latlng && this.activity.latlng.data.length > 0) {
         const data = turf.lineString(this.activity.latlng.data)
-        const bbox = turf.bbox(turf.transformScale(data, 10))
+        const bbox = turf.bbox(turf.transformScale(data, 6))
 
         const zoomBounds = L.latLngBounds(this.activity.latlng.data)
         const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
 
-        this.setupTiles(zoomBounds, tileBounds)
+        this.setupTiles(tileBounds, zoomBounds)
         L.geoJSON(turf.flip(data)).addTo(this.map)
       }
     }
