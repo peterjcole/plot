@@ -30,7 +30,7 @@
           </nav>
         </div>
         <div class="column">
-          <div class="box">
+          <div class="box map">
             <Map :activity="selectedActivity" />
           </div>
         </div>
@@ -175,13 +175,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.box {
-  height: 75vh;
-  padding: 0.75rem;
+//@import '~bulma/sass/utilities/mixins.sass';
 
-  &.activity-list {
-    overflow-x: hidden;
-    overflow-y: scroll;
-  }
-}
+
 </style>

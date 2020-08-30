@@ -13,7 +13,7 @@ import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fulls
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
-// import variables from '@/index.scss'
+import variables from '@/index.scss'
 
 export default {
   data() {
@@ -102,7 +102,15 @@ export default {
         const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
 
         this.setupTiles(tileBounds, zoomBounds)
-        L.geoJSON(turf.flip(data)).addTo(this.map)
+        L.geoJSON(turf.flip(data), {
+          style: () => {
+            return {
+              color: variables.primaryColor,
+              opacity: 0.5,
+              weight: 4
+            }
+          }
+        }).addTo(this.map)
       }
     },
   },

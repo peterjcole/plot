@@ -6,10 +6,24 @@ $primary: #FC4C02;
 
 @import '~bulma/bulma.sass';
 
+.box {
+  &.activity-list {
+    height: 75vh;
+    padding: 0.75rem;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    @include touch {
+      height: 60vh;
+    }
+  }
 
-.section-padding-mobile {
-  @include mobile() {
-    padding: 0rem 0.5rem;
+  &.map {
+    height: 75vh;
+    padding: 0.75rem;
+
+    @include touch {
+      height: 90vh;
+    }
   }
 }
 

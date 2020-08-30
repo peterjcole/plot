@@ -22,7 +22,7 @@
               <span class="icon nudge-icon"><font-awesome-icon :icon="['fab', 'github']"/></span>
               <a href="https://github.com/peterjcole/plot"
                 >Github project</a
-              >.
+              >
             </p>
           </div>
         </footer>
