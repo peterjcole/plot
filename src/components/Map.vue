@@ -7,6 +7,9 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 // eslint-disable-next-line no-unused-vars
 import p4l from 'proj4leaflet' // required for L.Proj.CRS
+import 'leaflet.fullscreen/Control.FullScreen.css'
+// eslint-disable-next-line no-unused-vars
+import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fullscreen control
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
@@ -45,6 +48,7 @@ export default {
         center: proj4('EPSG:27700', 'EPSG:4326', [337297, 503695]).reverse(),
         zoom: 7,
         attributionControl: false,
+        fullscreenControl: true,
       }
 
       this.map = L.map('map', mapOptions)
@@ -62,7 +66,7 @@ export default {
 
       const tileOptions = {
         maxNativeZoom: 9,
-        minNativeZoom: 8,
+        minNativeZoom: 7,
         tileBounds,
       }
       const mapsApiUrl = `/api/maps?y={y}&x={x}&z={z}`

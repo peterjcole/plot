@@ -15,8 +15,8 @@
                 </span>
               </div>
             </div>
-            <div class="level-right">
-              <button v-if="canDelete" class="button is-danger" @click="deleteActivity">
+            <div v-if="canDelete" class="level-right">
+              <button class="button is-danger" @click="deleteActivity">
                 Delete
               </button>
             </div>
@@ -24,13 +24,11 @@
         </div>
       </div>
     </section>
-    <section class="section map-section section-padding-mobile">
-      <div class="container">
-        <div class="box">
-          <Map :activity="{ latlng: { data: latLngArray } }" />
-        </div>
+    <div class="container">
+      <div class="box">
+        <Map :activity="{ latlng: { data: latLngArray } }" />
       </div>
-    </section>
+    </div>
   </div>
 </template>
 

@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import { faMap, faRunning, faBiking, faShareAlt, faLink } from '@fortawesome/free-solid-svg-icons'
+import { faMap, faRunning, faBiking, faShareAlt, faLink, faGripLines } from '@fortawesome/free-solid-svg-icons'
+import { faGithub, faStrava } from '@fortawesome/free-brands-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import VueTimeago from 'vue-timeago'
 import Clipboard from 'v-clipboard'
 
 
-library.add(faMap, faRunning, faBiking, faShareAlt, faLink)
+library.add(faMap, faRunning, faBiking, faShareAlt, faLink, faGithub, faStrava, faGripLines)
 
 Vue.config.productionTip = false
 
@@ -36,3 +37,5 @@ Vue.directive('focus', {
     el.focus()
   }
 })
+
+

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-brands-svg-icons": "^5.14.0",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/vue-fontawesome": "^0.1.10",
     "@turf/turf": "^5.1.6",
@@ -19,6 +20,7 @@
     "core-js": "^3.6.5",
     "firebase": "^7.19.1",
     "leaflet": "^1.6.0",
+    "leaflet.fullscreen": "^1.6.0",
     "node-fetch": "^2.6.0",
     "proj4leaflet": "^1.0.2",
     "v-clipboard": "^2.2.3",

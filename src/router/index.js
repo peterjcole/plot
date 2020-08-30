@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 
-import Home from '../views/Home'
+import Home from '../views/About'
 import SharedActivity from '../views/SharedActivity'
 import {store, mutations} from '@/store'
 import {dbAuth, db} from '@/db'

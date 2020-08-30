@@ -4,14 +4,14 @@
       <a class="navbar-item">
         <h4 class="is-4 title">
           <FontAwesomeIcon icon="map" />
-          plot
+           plot
         </h4>
       </a>
     </div>
 
     <div class="navbar-menu is-active">
       <div class="navbar-start">
-        <router-link class="navbar-item" to="/about">Home</router-link>
+        <router-link class="navbar-item" to="/about">About</router-link>
         <router-link class="navbar-item" to="/">Activities</router-link>
       </div>
 
@@ -35,3 +35,5 @@ export default {
   },
 }
 </script>
+
+
