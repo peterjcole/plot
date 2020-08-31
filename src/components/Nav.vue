@@ -1,18 +1,18 @@
 <template>
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <a class="navbar-item">
+      <router-link class="navbar-item" to="/">
         <h4 class="is-4 title">
-          <FontAwesomeIcon icon="map" />
+          <FontAwesomeIcon icon="map" />&nbsp;
            plot
         </h4>
-      </a>
+      </router-link>
     </div>
 
     <div class="navbar-menu is-active">
       <div class="navbar-start">
         <router-link class="navbar-item" to="/about">About</router-link>
-        <router-link class="navbar-item" to="/">Activities</router-link>
+        <router-link class="navbar-item" to="/">My activities</router-link>
       </div>
 
     </div>

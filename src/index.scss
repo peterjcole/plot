@@ -3,6 +3,7 @@ $hr-margin: 0.5rem;
 $navbar-breakpoint: 0;
 $footer-background-color: hsl(0, 0%, 100%);
 $primary: #FC4C02;
+$navbar-item-hover-color: $primary;
 
 @import '~bulma/bulma.sass';
 

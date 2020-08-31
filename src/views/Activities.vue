@@ -52,6 +52,7 @@ import Activity from '../components/Activity'
 import Map from '../components/Map'
 import { db, dbAuth } from '@/db'
 import ShareModal from '@/components/ShareModal'
+import { latlngToObject, adjectiveAnimal } from "@/utils"
 
 export default {
   components: {
@@ -77,7 +78,7 @@ export default {
       return navigator.share
     },
     sharedActivityUrl() {
-      return `${window.location.origin}/activity/${this.sharedActivityId}`
+      return `${window.location.origin}/${this.sharedActivityId}`
     },
   },
   mounted() {
@@ -95,7 +96,7 @@ export default {
           this.activities = res
         })
     },
-    getActivityDetails: function (id) {
+    async getActivityDetails(id) {
       const headers = {
         Authorization: `Bearer ${this.token}`,
       }
@@ -112,17 +113,18 @@ export default {
 
       document.getElementById('map').scrollIntoView()
     },
-    uploadActivity(id, index) {
+    async uploadActivity(id, index) {
       this.getActivityDetails(id).then((result) => {
         const activitiesRef = db.collection('activities')
         activitiesRef
           .where('id', '==', id)
           .get()
-          .then((existing) => {
+          .then(async (existing) => {
             if (existing.empty) {
               const dbActivity = this.generateDbActivity(result.data, index)
-              activitiesRef.add(dbActivity).then((docRef) => {
-                this.sharedActivityId = docRef.id
+              let dbId = await this.generateDbId(activitiesRef)
+              activitiesRef.doc(dbId).set(dbActivity).then(() => {
+                this.sharedActivityId = dbId
                 this.sharedActivity = dbActivity
                 this.shareActivity()
               })
@@ -133,6 +135,19 @@ export default {
             }
           })
       })
+    },
+    async generateDbId(collectionRef) {
+      let id = adjectiveAnimal()
+      let unique = false
+      while (!unique) {
+        const doc = await collectionRef.doc(id).get()
+        if (!doc.exists) {
+          unique = true
+        } else {
+          id = adjectiveAnimal()
+        }
+      }
+      return id
     },
     shareActivity() {
       if (this.webShareApiSupported) {
@@ -149,7 +164,7 @@ export default {
       const activity = this.activities.data[index]
 
       return {
-        latlng: this.latlngToObject(locationData.latlng.data),
+        latlng: latlngToObject(locationData.latlng.data),
         name: activity.name,
         distance: activity.distance,
         start_date_local: activity.start_date_local,
@@ -159,21 +174,9 @@ export default {
     isSelected(activity) {
       return activity && this.selectedActivity && activity.id === this.selectedActivity.id
     },
-    latlngToObject(latlngArray) {
-      return latlngArray.map((latlng) => {
-        return {
-          lat: latlng[0],
-          lng: latlng[1],
-        }
-      })
-    },
     closeModal() {
       this.showSharedUrlModal = false
     },
   },
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

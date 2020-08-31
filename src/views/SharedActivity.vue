@@ -16,9 +16,7 @@
               </div>
             </div>
             <div v-if="canDelete" class="level-right">
-              <button class="button is-danger" @click="deleteActivity">
-                Delete
-              </button>
+              <button class="button is-danger" @click="deleteActivity">Delete</button>
             </div>
           </nav>
         </div>
@@ -35,6 +33,7 @@
 <script>
 import Map from '@/components/Map'
 import { dbAuth } from '@/db'
+import {latLngToArray} from "@/utils"
 
 export default {
   name: 'SharedActivity',
@@ -52,15 +51,15 @@ export default {
     },
   },
   computed: {
-    latLngArray() {
-      return this.activity.latlng.map((latlngObject) => [latlngObject.lat, latlngObject.lng])
-    },
     distanceInKms() {
       return Number.parseFloat(this.activity.distance / 1000).toFixed(2)
     },
     canDelete() {
       return dbAuth.currentUser && dbAuth.currentUser.uid === this.activity.uid
     },
+    latLngArray() {
+      return latLngToArray(this.activity.latlng)
+    }
   },
   methods: {
     deleteActivity() {

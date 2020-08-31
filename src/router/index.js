@@ -66,7 +66,7 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Activities',
+    name: 'My Activities',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -76,7 +76,7 @@ const routes = [
     },
   },
   {
-    path: '/activity/:id',
+    path: '/:id',
     name: 'Shared Activity',
     component: SharedActivity,
     meta: {
@@ -103,6 +103,12 @@ const routes = [
       }
     },
   },
+  {
+    path: '/activity/:id',
+    redirect: to => {
+      return `/${to.params.id}`
+    }
+  }
 ]
 
 const router = new VueRouter({
