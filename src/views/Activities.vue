@@ -8,7 +8,7 @@
       </div>
     </section>
     <div class="container">
-      <div class="columns">
+      <div class="columns is-gapless">
         <div class="column is-one-quarter">
           <div class="box activity-list">
             <Activity
@@ -22,14 +22,14 @@
             />
           </div>
         </div>
-        <div class="column is-hidden-desktop">
-          <nav class="level">
+        <div class="column is-hidden-tablet">
+          <nav class="level gripline">
             <div class="level-item has-text-centered">
               <span class="icon"><font-awesome-icon icon="grip-lines" /></span>
             </div>
           </nav>
         </div>
-        <div class="column map">
+        <div class="column">
           <div class="box map">
             <Map :activity="selectedActivity" />
           </div>
@@ -180,3 +180,9 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  .gripline {
+    padding: 1.5rem 0;
+  }
+</style>

@@ -13,7 +13,7 @@ $navbar-item-hover-color: $primary;
     padding: 0.75rem;
     overflow-x: hidden;
     overflow-y: scroll;
-    @include touch {
+    @include mobile {
       height: 60vh;
     }
   }
@@ -22,15 +22,9 @@ $navbar-item-hover-color: $primary;
     height: 75vh;
     padding: 0.75rem;
 
-    @include touch {
+    @include mobile {
       height: 83vh;
     }
-  }
-}
-
-.column.map {
-  @include touch {
-    padding-bottom: 0;
   }
 }
 
