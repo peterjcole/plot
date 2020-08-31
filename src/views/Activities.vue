@@ -20,6 +20,7 @@
               @select-activity="selectActivity"
               @share-activity="uploadActivity"
             />
+            <infinite-loading @infinite="infiniteHandler" spinner="spiral"></infinite-loading>
           </div>
         </div>
         <div class="column is-hidden-tablet">
@@ -47,12 +48,13 @@
 <script>
 import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import InfiniteLoading from 'vue-infinite-loading'
 
 import Activity from '../components/Activity'
 import Map from '../components/Map'
 import { db, dbAuth } from '@/db'
 import ShareModal from '@/components/ShareModal'
-import { latlngToObject, adjectiveAnimal } from "@/utils"
+import { latlngToObject, adjectiveAnimal } from '@/utils'
 
 export default {
   components: {
@@ -60,6 +62,7 @@ export default {
     Activity,
     Map,
     FontAwesomeIcon,
+    InfiniteLoading,
   },
   data: () => {
     return {
@@ -68,6 +71,7 @@ export default {
       sharedActivityId: null,
       sharedActivity: {},
       showSharedUrlModal: false,
+      page: 1,
     }
   },
   computed: {
@@ -81,21 +85,7 @@ export default {
       return `${window.location.origin}/${this.sharedActivityId}`
     },
   },
-  mounted() {
-    this.getActivities()
-  },
   methods: {
-    getActivities() {
-      const headers = {
-        Authorization: `Bearer ${this.token}`,
-      }
-
-      axios
-        .get('https://www.strava.com/api/v3/athlete/activities?per_page=50', { headers })
-        .then((res) => {
-          this.activities = res
-        })
-    },
     async getActivityDetails(id) {
       const headers = {
         Authorization: `Bearer ${this.token}`,
@@ -105,6 +95,28 @@ export default {
         `https://www.strava.com/api/v3/activities/${id}/streams?keys=latlng,id&key_by_type=true`,
         { headers }
       )
+    },
+    infiniteHandler($state) {
+      const headers = {
+        Authorization: `Bearer ${this.token}`,
+      }
+
+      const params = {
+        page: this.page,
+        'per-page': 50,
+      }
+
+      axios
+        .get('https://www.strava.com/api/v3/athlete/activities', { headers, params })
+        .then((res) => {
+          if (res.data.length) {
+            this.page += 1
+            this.activities.data.push(...res.data)
+            $state.loaded()
+          } else {
+            $state.complete()
+          }
+        })
     },
     selectActivity(id) {
       this.getActivityDetails(id).then((result) => {
@@ -123,11 +135,14 @@ export default {
             if (existing.empty) {
               const dbActivity = this.generateDbActivity(result.data, index)
               let dbId = await this.generateDbId(activitiesRef)
-              activitiesRef.doc(dbId).set(dbActivity).then(() => {
-                this.sharedActivityId = dbId
-                this.sharedActivity = dbActivity
-                this.shareActivity()
-              })
+              activitiesRef
+                .doc(dbId)
+                .set(dbActivity)
+                .then(() => {
+                  this.sharedActivityId = dbId
+                  this.sharedActivity = dbActivity
+                  this.shareActivity()
+                })
             } else {
               this.sharedActivityId = existing.docs[0].id
               this.sharedActivity = existing.docs[0].data()
@@ -182,7 +197,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .gripline {
-    padding: 1.5rem 0;
-  }
+.gripline {
+  padding: 1.5rem 0;
+}
 </style>
