@@ -71,21 +71,16 @@ export default {
         L.latLng(54.44259993088727, -2.9374139555606513),
         L.latLng(54.416359041392084, -2.9817969157636037)
       )
-      const startBounds = L.latLngBounds(
-        L.latLng(54.75474418589996, -2.557133753083287),
-        L.latLng(54.0934435371236, -3.3719427214496935)
-      )
       window.map = this.map
 
-      this.setupTiles(startBounds, startZoomBounds)
+      this.setupTiles(startZoomBounds)
     },
-    setupTiles(tileBounds, zoomBounds) {
+    setupTiles(zoomBounds) {
       this.map.eachLayer((layer) => this.map.removeLayer(layer))
 
       const tileOptions = {
         maxNativeZoom: 9,
         minNativeZoom: 8,
-        bounds: tileBounds,
       }
       const mapsApiUrl = `/api/maps?y={y}&x={x}&z={z}`
 
@@ -96,12 +91,10 @@ export default {
     plotActivity() {
       if (this.activityLoaded) {
         const data = turf.lineString(this.activity.latlng.data)
-        const bbox = turf.bbox(turf.transformScale(data, 10))
 
         const zoomBounds = L.latLngBounds(this.activity.latlng.data)
-        const tileBounds = L.latLngBounds(L.latLng(bbox[2], bbox[3]), L.latLng(bbox[0], bbox[1]))
 
-        this.setupTiles(tileBounds, zoomBounds)
+        this.setupTiles(zoomBounds)
         L.geoJSON(turf.flip(data), {
           style: () => {
             return {
