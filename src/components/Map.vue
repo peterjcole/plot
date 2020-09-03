@@ -99,7 +99,7 @@ export default {
           style: () => {
             return {
               color: '#080357',
-              opacity: 0.6,
+              opacity: 0.5,
               weight: 4
             }
           }
