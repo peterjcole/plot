@@ -119,15 +119,14 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   dbAuth.signInAnonymously()
-
   if (to.matched.some((record) => record.meta.requiresAuth === true)) {
     mutations.retrieveTokenFromLocalStorage()
-    // eslint-disable-next-line no-debugger
-    // debugger
     const isAuthenticated = store.tokenExpiry > Date.now() / 1000
-    isAuthenticated ? next() : next('/about')
+    const knownUser = window.localStorage.getItem('knownUser')
+    isAuthenticated ? next() : knownUser ? next('/login') : next('/about')
+  } else {
+    next()
   }
-  next()
 })
 
 export default router

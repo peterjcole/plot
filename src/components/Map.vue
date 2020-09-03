@@ -13,7 +13,7 @@ import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fulls
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
-import variables from '@/index.scss'
+// import variables from '@/index.scss'
 
 export default {
   data() {
@@ -98,8 +98,8 @@ export default {
         L.geoJSON(turf.flip(data), {
           style: () => {
             return {
-              color: variables.primaryColor,
-              opacity: 0.5,
+              color: '#080357',
+              opacity: 0.6,
               weight: 4
             }
           }

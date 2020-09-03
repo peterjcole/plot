@@ -12,6 +12,7 @@ export const mutations = {
     store.tokenExpiry = tokenExpiry
     window.localStorage.setItem('token', token)
     window.localStorage.setItem('tokenExpiry', tokenExpiry)
+    window.localStorage.setItem('knownUser', true)
   },
   retrieveTokenFromLocalStorage() {
     if (!store.token || !store.tokenExpiry) {

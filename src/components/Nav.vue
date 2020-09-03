@@ -14,7 +14,6 @@
         <router-link class="navbar-item" to="/about">About</router-link>
         <router-link class="navbar-item" to="/">My activities</router-link>
       </div>
-
     </div>
   </nav>
 </template>

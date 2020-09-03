@@ -55,6 +55,7 @@ import Map from '../components/Map'
 import { db, dbAuth } from '@/db'
 import ShareModal from '@/components/ShareModal'
 import { latlngToObject, adjectiveAnimal } from '@/utils'
+import { store, mutations } from "@/store"
 
 export default {
   components: {
@@ -75,30 +76,32 @@ export default {
     }
   },
   computed: {
-    token() {
-      return localStorage.getItem('token')
-    },
     webShareApiSupported() {
       return navigator.share
     },
     sharedActivityUrl() {
       return `${window.location.origin}/${this.sharedActivityId}`
-    },
+    }
   },
   methods: {
     async getActivityDetails(id) {
       const headers = {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${store.token}`,
       }
 
       return axios.get(
         `https://www.strava.com/api/v3/activities/${id}/streams?keys=latlng,id&key_by_type=true`,
         { headers }
-      )
+      ).catch(error => {
+        if (error.response.status === 401) {
+          mutations.clearToken()
+          this.$router.push('/login')
+        }
+      })
     },
     infiniteHandler($state) {
       const headers = {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${store.token}`,
       }
 
       const params = {
@@ -129,7 +132,7 @@ export default {
       this.getActivityDetails(id).then((result) => {
         const activitiesRef = db.collection('activities')
         activitiesRef
-          .where('id', '==', id)
+          .where('activityId', '==', id)
           .get()
           .then(async (existing) => {
             if (existing.empty) {
@@ -179,6 +182,7 @@ export default {
       const activity = this.activities.data[index]
 
       return {
+        activityId: activity.id,
         latlng: latlngToObject(locationData.latlng.data),
         name: activity.name,
         distance: activity.distance,
