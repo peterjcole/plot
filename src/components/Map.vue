@@ -13,8 +13,6 @@ import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fulls
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
-// import variables from '@/index.scss'
-
 export default {
   data() {
     return {

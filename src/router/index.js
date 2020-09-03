@@ -53,6 +53,7 @@ const routes = [
         })
         .then((res) => {
           mutations.setToken(res.data.access_token, res.data.expires_at)
+          window.localStorage.setItem('knownUser', true)
           next('/')
         })
         .catch((err) => {
