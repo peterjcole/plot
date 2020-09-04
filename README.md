@@ -1,6 +1,7 @@
 # plot
 > View, and share, your Strava Activities on an [Ordnance Survey Explorer 1:25000 map](https://shop.ordnancesurvey.co.uk/mapsheetfinder.html#choosing) (UK only)
 
+https://plot.fit
 
 ## Local setup
 ### Prerequisites
