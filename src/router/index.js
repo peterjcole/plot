@@ -94,7 +94,7 @@ const routes = [
           } else {
             next('/')
           }
-        }).catch(() => next('/'))
+        })
     },
 
     props: () => {

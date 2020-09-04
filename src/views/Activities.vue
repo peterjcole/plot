@@ -120,6 +120,12 @@ export default {
             $state.complete()
           }
         })
+      .catch(error => {
+        if (error.response.status === 401) {
+          mutations.clearToken()
+          this.$router.push('/login')
+        }
+      })
     },
     selectActivity(id) {
       this.getActivityDetails(id).then((result) => {
