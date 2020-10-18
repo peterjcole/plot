@@ -24,7 +24,7 @@
     </section>
     <div class="container">
       <div class="box">
-        <Map :activity="{ latlng: { data: latLngArray } }" />
+        <Map :latlng="latLngArray" />
       </div>
     </div>
   </div>

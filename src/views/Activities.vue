@@ -32,7 +32,7 @@
         </div>
         <div class="column">
           <div class="box map">
-            <Map :activity="selectedActivity" />
+            <Map :latlng="selectedLatlng" />
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default {
   data: () => {
     return {
       activities: { data: [] },
-      selectedActivity: {},
+      selectedActivity: { latlng: { data: null} },
       sharedActivityId: null,
       sharedActivity: {},
       showSharedUrlModal: false,
@@ -81,6 +81,9 @@ export default {
     },
     sharedActivityUrl() {
       return `${window.location.origin}/${this.sharedActivityId}`
+    },
+    selectedLatlng() {
+      return this.selectedActivity.latlng ? this.selectedActivity.latlng.data : null
     }
   },
   methods: {

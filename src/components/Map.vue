@@ -14,26 +14,25 @@ import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
 export default {
+  props: {
+    latlng: {
+      type: Array,
+      required: false,
+      default: null
+    }
+  },
   data() {
     return {
       map: null,
     }
   },
-  props: {
-    activity: Object,
+  watch: {
+    latlng() {
+      this.plotLatlng()
+    },
   },
   mounted() {
     this.initialiseMap()
-  },
-  watch: {
-    activity() {
-      this.plotActivity()
-    },
-  },
-  computed: {
-    activityLoaded() {
-      return this.activity && this.activity.latlng && this.activity.latlng.data.length > 0
-    },
   },
   methods: {
     initialiseMap() {
@@ -58,10 +57,10 @@ export default {
 
       this.map = L.map('map', mapOptions)
 
-      if (!this.activityLoaded) {
+      if (!this.latlng) {
         this.setupStartTiles()
       } else {
-        this.plotActivity()
+        this.plotLatlng()
       }
     },
     setupStartTiles() {
@@ -86,11 +85,11 @@ export default {
 
       this.map.fitBounds(zoomBounds)
     },
-    plotActivity() {
-      if (this.activityLoaded) {
-        const data = turf.lineString(this.activity.latlng.data)
+    plotLatlng() {
+      if (this.latlng) {
+        const data = turf.lineString(this.latlng)
 
-        const zoomBounds = L.latLngBounds(this.activity.latlng.data)
+        const zoomBounds = L.latLngBounds(this.latlng)
 
         this.setupTiles(zoomBounds)
         L.geoJSON(turf.flip(data), {
