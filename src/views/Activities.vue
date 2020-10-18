@@ -115,6 +115,9 @@ export default {
           if (res.data.length) {
             this.page += 1
             this.activities.data.push(...res.data)
+            if(!this.selectedActivity.id) {
+              this.selectActivity(res.data[0].id)
+            }
             $state.loaded()
           } else {
             $state.complete()
