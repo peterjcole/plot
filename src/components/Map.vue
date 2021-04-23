@@ -13,18 +13,21 @@ import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fulls
 import * as GeoSearch from 'leaflet-geosearch'
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
+import 'leaflet-defaulticon-compatibility'
 
 export default {
   props: {
     latlng: {
       type: Array,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       map: null,
+      locationMarker: null,
+      locationCircle: null
     }
   },
   watch: {
@@ -65,13 +68,30 @@ export default {
       }
 
       const search = new GeoSearch.GeoSearchControl({
-        style: 'bar',
-        position: 'topleft',
+        style: 'button',
+        position: 'topright',
         provider: new GeoSearch.OpenStreetMapProvider(),
       })
 
       this.map.addControl(search)
 
+      this.map.locate({ maxZoom: 16, watch: true })
+
+      this.map.on('locationfound', this.onLocationFound)
+    },
+    onLocationFound(e) {
+      if (this.locationMarker) {
+        this.locationMarker.remove()
+      }
+      if (this.locationCircle) {
+        this.locationCircle.remove()
+      }
+      const radius = e.accuracy
+
+      this.locationMarker = L.marker(e.latlng)
+        .addTo(this.map)
+
+      this.locationCircle = L.circle(e.latlng, radius).addTo(this.map)
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -107,9 +127,9 @@ export default {
             return {
               color: '#080357',
               opacity: 0.5,
-              weight: 4
+              weight: 4,
             }
-          }
+          },
         }).addTo(this.map)
       }
     },
@@ -121,10 +141,5 @@ export default {
 #map {
   height: 100%;
   z-index: 0;
-}
-.leaflet-control-geosearch {
-  position: absolute;
-  right: 0;
-  margin: 10px
 }
 </style>

@@ -6,7 +6,9 @@
           <nav class="level">
             <div class="level-left">
               <div class="content">
-                <h1 class="title is-1">{{ `${activity.name} ` }}</h1>
+                <h1 class="title is-1">
+                  {{ `${activity.name} ` }}
+                </h1>
                 <p class="subtitle is-3">
                   {{ ` ${distanceInKms} km` }}
                 </p>
@@ -15,8 +17,16 @@
                 </span>
               </div>
             </div>
-            <div v-if="canDelete" class="level-right">
-              <button class="button is-danger" @click="deleteActivity">Delete</button>
+            <div
+              v-if="canDelete"
+              class="level-right"
+            >
+              <button
+                class="button is-danger"
+                @click="deleteActivity"
+              >
+                Delete
+              </button>
             </div>
           </nav>
         </div>

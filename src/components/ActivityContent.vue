@@ -1,24 +1,23 @@
 <template>
-  <div
-    class="content"
-    :class="{ selected: selected }"
-    tabindex="0"
-    @keydown="selectActivity"
-    @mousedown="selectActivity"
-  >
-    <p>
+  <div>
+    <p class="mb-1">
       <strong>
         <span class="activity-name">{{ activity.name }}</span>
         <span class="icon">
-          <font-awesome-icon v-if="activityIcon" :icon="activityIcon" />
+          <font-awesome-icon
+            v-if="activityIcon"
+            :icon="activityIcon"
+          />
         </span>
       </strong>
-      <br />
+    </p>
+    <p class="mb-1">
       <small>
         <Timeago :datetime="activity.start_date_local" />
       </small>
-      <br />
-      <small>{{ `${distanceInKms} km` }}</small>
+    </p>
+    <p>
+      <small>{{ formattedDistanceInKms }}</small>
     </p>
   </div>
 </template>
@@ -34,15 +33,11 @@ export default {
     activity: {
       type: Object,
       required: true,
-    },
-    selected: {
-      type: Boolean,
-      required: true,
-    },
+    }
   },
   computed: {
-    distanceInKms() {
-      return Number.parseFloat(this.activity.distance / 1000).toFixed(2)
+    formattedDistanceInKms() {
+      return `${Number.parseFloat(this.activity.distance / 1000).toFixed(2)} km`
     },
     activityIcon() {
       return {
@@ -51,42 +46,9 @@ export default {
       }[this.activity.type]
     },
   },
-  methods: {
-    selectActivity(e) {
-      if (e.keyCode == 32 || e.type === 'mousedown') {
-        e.preventDefault()
-        this.$emit('select-activity', this.activity.id)
-      }
-    },
-    // cancelOutline(e) {
-    // }
-  },
 }
 </script>
 <style lang="scss" scoped>
-.content {
-  border-radius: 5px;
-
-  &:hover {
-    background-color: whitesmoke;
-  }
-
-  &:active {
-    background-color: lightgrey;
-    outline-color: darkgrey;
-  }
-
-  &:focus {
-    outline-color: darkgrey;
-  }
-
-  &.selected {
-    background-color: whitesmoke;
-  }
-
-  padding: 10px 10px 10px 15px;
-}
-
 .icon {
   position: relative;
   top: 2px;

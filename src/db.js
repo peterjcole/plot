@@ -11,7 +11,7 @@ const firebaseConfig = {
   messagingSenderId: "462407248528",
   appId: "1:462407248528:web:8ae86ddbac13d6ffe34615",
   measurementId: "G-0P6ERYEYTH"
-};
+}
 
 
 // Get a Firestore instance

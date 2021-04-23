@@ -3,7 +3,9 @@
     <section class="hero">
       <div class="hero-body">
         <div class="container">
-          <h1 class="title is-1">Activities</h1>
+          <h1 class="title is-1">
+            Activities
+          </h1>
         </div>
       </div>
     </section>
@@ -11,16 +13,23 @@
       <div class="columns is-gapless">
         <div class="column is-one-quarter">
           <div class="box activity-list">
-            <Activity
+            <ListItem
               v-for="(activity, index) in activities.data"
+              :id="activity.id.toString()"
               :key="activity.id"
-              :activity="activity"
+              :item-details="activity"
               :index="index"
               :selected="isSelected(activity)"
-              @select-activity="selectActivity"
-              @share-activity="uploadActivity"
+              :show-share-button="true"
+              @select="selectActivity"
+              @share="uploadActivity"
+            >
+              <ActivityContent :activity="activity" />
+            </ListItem>
+            <infinite-loading
+              spinner="spiral"
+              @infinite="infiniteHandler"
             />
-            <infinite-loading @infinite="infiniteHandler" spinner="spiral"></infinite-loading>
           </div>
         </div>
         <div class="column is-hidden-tablet">
@@ -39,8 +48,8 @@
     </div>
     <ShareModal
       v-if="showSharedUrlModal"
-      @close-modal="closeModal"
       :shared-activity-url="sharedActivityUrl"
+      @close-modal="closeModal"
     />
   </div>
 </template>
@@ -50,25 +59,28 @@ import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import InfiniteLoading from 'vue-infinite-loading'
 
-import Activity from '../components/Activity'
-import Map from '../components/Map'
+import ListItem from '@/components/ListItem'
+import ActivityContent from '@/components/ActivityContent'
+import Map from '@/components/Map'
 import { db, dbAuth } from '@/db'
 import ShareModal from '@/components/ShareModal'
 import { latlngToObject, adjectiveAnimal } from '@/utils'
-import { store, mutations } from "@/store"
+import { store, mutations } from '@/store'
 
 export default {
+  name: 'Activities',
   components: {
     ShareModal,
-    Activity,
     Map,
+    ListItem,
     FontAwesomeIcon,
     InfiniteLoading,
+    ActivityContent,
   },
   data: () => {
     return {
       activities: { data: [] },
-      selectedActivity: { latlng: { data: null} },
+      selectedActivity: { latlng: { data: null } },
       sharedActivityId: null,
       sharedActivity: {},
       showSharedUrlModal: false,
@@ -84,7 +96,7 @@ export default {
     },
     selectedLatlng() {
       return this.selectedActivity.latlng ? this.selectedActivity.latlng.data : null
-    }
+    },
   },
   methods: {
     async getActivityDetails(id) {
@@ -92,15 +104,17 @@ export default {
         Authorization: `Bearer ${store.token}`,
       }
 
-      return axios.get(
-        `https://www.strava.com/api/v3/activities/${id}/streams?keys=latlng,id&key_by_type=true`,
-        { headers }
-      ).catch(error => {
-        if (error.response.status === 401) {
-          mutations.clearToken()
-          this.$router.push('/login')
-        }
-      })
+      return axios
+        .get(
+          `https://www.strava.com/api/v3/activities/${id}/streams?keys=latlng,id&key_by_type=true`,
+          { headers }
+        )
+        .catch((error) => {
+          if (error.response.status === 401) {
+            mutations.clearToken()
+            this.$router.push('/login')
+          }
+        })
     },
     infiniteHandler($state) {
       const headers = {
@@ -118,7 +132,7 @@ export default {
           if (res.data.length) {
             this.page += 1
             this.activities.data.push(...res.data)
-            if(!this.selectedActivity.id) {
+            if (!this.selectedActivity.id) {
               this.selectActivity(res.data[0].id)
             }
             $state.loaded()
@@ -126,14 +140,16 @@ export default {
             $state.complete()
           }
         })
-      .catch(error => {
-        if (error.response.status === 401) {
-          mutations.clearToken()
-          this.$router.push('/login')
-        }
-      })
+        .catch((error) => {
+          if (error.response.status === 401) {
+            mutations.clearToken()
+            this.$router.push('/login')
+          }
+        })
     },
     selectActivity(id) {
+      this.selectedActivity.id = id
+
       this.getActivityDetails(id).then((result) => {
         this.selectedActivity = { ...result.data, id }
       })
