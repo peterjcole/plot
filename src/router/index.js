@@ -2,10 +2,11 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 
-import Home from '../views/About'
-import SharedActivity from '../views/SharedActivity'
+import Home from '@/views/About'
+import SharedActivity from '@/views/SharedActivity'
 import {store, mutations} from '@/store'
 import {dbAuth, db} from '@/db'
+import RoutePlotter from "@/views/RoutePlotter"
 
 Vue.use(VueRouter)
 
@@ -66,6 +67,14 @@ const routes = [
     },
   },
   {
+    path: '/route',
+    name: 'Plot a Route',
+    component: RoutePlotter,
+    meta: {
+      requiresAuth: false,
+    }
+  },
+  {
     path: '/',
     name: 'My Activities',
     // route level code-splitting
@@ -109,7 +118,7 @@ const routes = [
     redirect: to => {
       return `/${to.params.id}`
     }
-  }
+  },
 ]
 
 const router = new VueRouter({

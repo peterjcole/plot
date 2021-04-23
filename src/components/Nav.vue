@@ -2,10 +2,7 @@
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <router-link class="navbar-item" to="/">
-        <h4 class="is-4 title">
-          <FontAwesomeIcon icon="map" />&nbsp;
-           plot
-        </h4>
+        <h4 class="is-4 title"><FontAwesomeIcon icon="map" />&nbsp; plot</h4>
       </router-link>
     </div>
 
@@ -13,6 +10,7 @@
       <div class="navbar-start">
         <router-link class="navbar-item" to="/about">About</router-link>
         <router-link class="navbar-item" to="/">My activities</router-link>
+        <router-link class="navbar-item" to="/route">Plot a route</router-link>
       </div>
     </div>
   </nav>
@@ -34,5 +32,3 @@ export default {
   },
 }
 </script>
-
-
