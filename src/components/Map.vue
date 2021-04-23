@@ -10,6 +10,7 @@ import L from 'leaflet'
 import p4l from 'proj4leaflet' // required for L.Proj.CRS
 // eslint-disable-next-line no-unused-vars
 import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fullscreen control
+import * as GeoSearch from 'leaflet-geosearch'
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
 
@@ -62,6 +63,15 @@ export default {
       } else {
         this.plotLatlng()
       }
+
+      const search = new GeoSearch.GeoSearchControl({
+        style: 'bar',
+        position: 'topleft',
+        provider: new GeoSearch.OpenStreetMapProvider(),
+      })
+
+      this.map.addControl(search)
+
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -107,9 +117,14 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #map {
   height: 100%;
   z-index: 0;
+}
+.leaflet-control-geosearch {
+  position: absolute;
+  right: 0;
+  margin: 10px
 }
 </style>

@@ -6,6 +6,7 @@ $primary: #FC4C02;
 $navbar-item-hover-color: $primary;
 
 @import '~bulma/bulma.sass';
+@import '~leaflet-geosearch/dist/geosearch.css';
 
 .box {
   &.activity-list {
