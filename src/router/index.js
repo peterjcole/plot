@@ -25,7 +25,7 @@ const routes = [
       stravaUrl.searchParams.append('client_id', process.env.VUE_APP_STRAVA_CLIENT_ID)
       stravaUrl.searchParams.append('redirect_uri', `${window.location.origin}/redirect`)
       stravaUrl.searchParams.append('response_type', 'code')
-      stravaUrl.searchParams.append('scope', 'activity:read')
+      stravaUrl.searchParams.append('scope', 'activity:read,read_all')
       stravaUrl.searchParams.append('approval_prompt', 'auto')
       window.location.replace(stravaUrl)
     },
@@ -63,6 +63,17 @@ const routes = [
     },
     meta: {
       requiresAuth: false,
+    },
+  },
+  {
+    path: '/routes',
+    name: 'My Routes',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Routes.vue'),
+    meta: {
+      requiresAuth: true,
     },
   },
   {

@@ -6,8 +6,11 @@
           <h1>plot</h1>
           <blockquote>View your Strava activities on an Ordnance Survey map</blockquote>
           <p>Click below to get started!</p>
-          <router-link class="button is-primary" to="/login">
-            <span class="icon"><font-awesome-icon :icon="['fab', 'strava']"/></span>
+          <router-link
+            class="button is-primary"
+            to="/login"
+          >
+            <span class="icon"><font-awesome-icon :icon="['fab', 'strava']" /></span>
             <strong>Connect to Strava</strong>
           </router-link>
         </div>
@@ -18,11 +21,11 @@
         <footer class="footer">
           <div class="content has-text-centered">
             <p>
-              <span class="icon nudge-icon"><font-awesome-icon icon="map"/></span><strong>plot</strong> by <a href="https://github.com/peterjcole">Peter Cole</a> |
-              <span class="icon nudge-icon"><font-awesome-icon :icon="['fab', 'github']"/></span>
-              <a href="https://github.com/peterjcole/plot"
-                >Github project</a
-              >
+              <span class="icon nudge-icon"><font-awesome-icon icon="map" /></span><strong>plot</strong> by <a href="https://github.com/peterjcole">Peter Cole</a> |
+              <span class="icon nudge-icon"><font-awesome-icon :icon="['fab', 'github']" /></span>
+              <a
+                href="https://github.com/peterjcole/plot"
+              >Github project</a>
             </p>
           </div>
         </footer>
