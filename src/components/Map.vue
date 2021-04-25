@@ -30,12 +30,13 @@ export default {
     return {
       map: null,
       locationMarker: null,
-      locationCircle: null
+      locationCircle: null,
+      locateLayer: null
     }
   },
   watch: {
     latlng() {
-      this.plotLatlng()
+      this.onLatlngChange()
     },
   },
   mounted() {
@@ -68,7 +69,7 @@ export default {
       if (!this.latlng) {
         this.setupStartTiles()
       } else {
-        this.plotLatlng()
+        this.onLatlngChange()
       }
 
       const search = new GeoSearch.GeoSearchControl({
@@ -78,9 +79,13 @@ export default {
 
       this.map.addControl(search)
 
-      L.control.locate({ iconElementTag: 'i',
+      this.locateLayer = new L.LayerGroup()
+
+      L.control.locate({
+        layer: this.locateLayer,
+        iconElementTag: 'i',
         icon: 'fas fa-location-arrow',
-        showCompass: false,
+        showCompass: true,
         locationOptions: {
           enableHighAccuracy: true
         }
@@ -108,8 +113,9 @@ export default {
 
       this.map.fitBounds(zoomBounds)
     },
-    plotLatlng() {
+    onLatlngChange() {
       if (this.latlng) {
+        this.locateLayer.remove()
         const data = turf.lineString(this.latlng)
 
         const zoomBounds = L.latLngBounds(this.latlng)
@@ -124,6 +130,7 @@ export default {
             }
           },
         }).addTo(this.map)
+        this.locateLayer.addTo(this.map)
       }
     },
   },
