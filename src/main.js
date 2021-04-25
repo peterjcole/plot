@@ -1,14 +1,16 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import { faMap, faRunning, faBiking, faShareAlt, faLink, faGripLines } from '@fortawesome/free-solid-svg-icons'
+import { faMap, faRunning, faBiking, faShareAlt, faLink, faGripLines, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
 import { faGithub, faStrava } from '@fortawesome/free-brands-svg-icons'
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library, dom } from '@fortawesome/fontawesome-svg-core'
+
 import VueTimeago from 'vue-timeago'
 import Clipboard from 'v-clipboard'
 
 
-library.add(faMap, faRunning, faBiking, faShareAlt, faLink, faGithub, faStrava, faGripLines)
+library.add(faMap, faRunning, faBiking, faShareAlt, faLink, faGithub, faStrava, faGripLines, faLocationArrow)
+dom.watch()
 
 Vue.config.productionTip = false
 
