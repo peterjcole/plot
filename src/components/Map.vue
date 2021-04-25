@@ -60,7 +60,7 @@ export default {
         zoom: 7,
         attributionControl: false,
         fullscreenControl: true,
-        tap: false // ref https://github.com/Leaflet/Leaflet/issues/7255
+        tap: false, // ref https://github.com/Leaflet/Leaflet/issues/7255
       }
 
       this.map = L.map('map', mapOptions)
@@ -78,8 +78,13 @@ export default {
 
       this.map.addControl(search)
 
-      L.control.locate({ iconElementTag: 'i', icon: 'fas fa-location-arrow' }).addTo(this.map)
-
+      L.control.locate({ iconElementTag: 'i',
+        icon: 'fas fa-location-arrow',
+        showCompass: false,
+        locationOptions: {
+          enableHighAccuracy: true
+        }
+      }).addTo(this.map)
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -130,10 +135,10 @@ export default {
   height: 100%;
   z-index: 0;
 }
+
 .leaflet-control-geosearch {
   position: absolute;
   right: 0;
-  margin: 10px
+  margin: 10px;
 }
-
 </style>

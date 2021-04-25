@@ -20,7 +20,7 @@
     "core-js": "^3.11.0",
     "dayjs": "^1.10.4",
     "firebase": "^7.24.0",
-    "leaflet": "^1.7.0",
+    "leaflet": "1.7.0",
     "leaflet-defaulticon-compatibility": "^0.1.1",
     "leaflet-geosearch": "^3.3.1",
     "leaflet.fullscreen": "^1.6.0",
