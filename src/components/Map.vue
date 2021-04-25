@@ -57,6 +57,7 @@ export default {
         zoom: 7,
         attributionControl: false,
         fullscreenControl: true,
+        tap: false // ref https://github.com/Leaflet/Leaflet/issues/7255
       }
 
       this.map = L.map('map', mapOptions)
