@@ -5,11 +5,14 @@
 <script>
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.fullscreen/Control.FullScreen.css'
+// import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css'
 import L from 'leaflet'
 // eslint-disable-next-line no-unused-vars
 import p4l from 'proj4leaflet' // required for L.Proj.CRS
 // eslint-disable-next-line no-unused-vars
 import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fullscreen control
+// eslint-disable-next-line no-unused-vars
+import leafletLocateControl from 'leaflet.locatecontrol' // required for leaflet locate control
 import * as GeoSearch from 'leaflet-geosearch'
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
@@ -68,30 +71,14 @@ export default {
       }
 
       const search = new GeoSearch.GeoSearchControl({
-        style: 'button',
-        position: 'topright',
+        style: 'bar',
         provider: new GeoSearch.OpenStreetMapProvider(),
       })
 
       this.map.addControl(search)
 
-      this.map.locate({ maxZoom: 16, watch: true })
+      L.control.locate({ iconElementTag: 'i', icon: 'fas fa-location-arrow' }).addTo(this.map)
 
-      this.map.on('locationfound', this.onLocationFound)
-    },
-    onLocationFound(e) {
-      if (this.locationMarker) {
-        this.locationMarker.remove()
-      }
-      if (this.locationCircle) {
-        this.locationCircle.remove()
-      }
-      const radius = e.accuracy
-
-      this.locationMarker = L.marker(e.latlng)
-        .addTo(this.map)
-
-      this.locationCircle = L.circle(e.latlng, radius).addTo(this.map)
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -142,4 +129,10 @@ export default {
   height: 100%;
   z-index: 0;
 }
+.leaflet-control-geosearch {
+  position: absolute;
+  right: 0;
+  margin: 10px
+}
+
 </style>
