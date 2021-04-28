@@ -31,7 +31,7 @@ export default {
       map: null,
       locationMarker: null,
       locationCircle: null,
-      locateLayer: null
+      locateLayer: null,
     }
   },
   watch: {
@@ -60,7 +60,7 @@ export default {
         center: proj4('EPSG:27700', 'EPSG:4326', [337297, 503695]).reverse(),
         zoom: 7,
         attributionControl: false,
-        fullscreenControl: true,
+        fullscreenControl: !this.isIOSDevice,
         tap: false, // ref https://github.com/Leaflet/Leaflet/issues/7255
       }
 
@@ -81,15 +81,17 @@ export default {
 
       this.locateLayer = new L.LayerGroup()
 
-      L.control.locate({
-        layer: this.locateLayer,
-        iconElementTag: 'i',
-        icon: 'fas fa-location-arrow',
-        showCompass: true,
-        locationOptions: {
-          enableHighAccuracy: true
-        }
-      }).addTo(this.map)
+      L.control
+        .locate({
+          layer: this.locateLayer,
+          iconElementTag: 'i',
+          icon: 'fas fa-location-arrow',
+          showCompass: true,
+          locationOptions: {
+            enableHighAccuracy: true,
+          },
+        })
+        .addTo(this.map)
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -132,6 +134,17 @@ export default {
         }).addTo(this.map)
         this.locateLayer.addTo(this.map)
       }
+    },
+  },
+  computed: {
+    isIOSDevice() {
+      return (
+        ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+          navigator.platform
+        ) ||
+        // iPad on iOS 13 detection
+        (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+      )
     },
   },
 }
