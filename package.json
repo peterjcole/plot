@@ -25,6 +25,7 @@
     "leaflet-geosearch": "^3.3.1",
     "leaflet.fullscreen": "^1.6.0",
     "leaflet.locatecontrol": "^0.73.0",
+    "leaflet.offline": "^2.0.0-beta.3",
     "node-fetch": "^2.6.1",
     "proj4leaflet": "^1.0.2",
     "v-clipboard": "^2.2.3",

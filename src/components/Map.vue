@@ -13,6 +13,8 @@ import p4l from 'proj4leaflet' // required for L.Proj.CRS
 import leafletFullscreen from 'leaflet.fullscreen' // required for leaflet fullscreen control
 // eslint-disable-next-line no-unused-vars
 import leafletLocateControl from 'leaflet.locatecontrol' // required for leaflet locate control
+// eslint-disable-next-line no-unused-vars
+import leafletOffline from 'leaflet.offline' // required for leaflet offline control
 import * as GeoSearch from 'leaflet-geosearch'
 import proj4 from 'proj4'
 import * as turf from '@turf/turf'
@@ -31,7 +33,8 @@ export default {
       map: null,
       locationMarker: null,
       locationCircle: null,
-      locateLayer: null
+      locateLayer: null,
+      mapLayer: null
     }
   },
   watch: {
@@ -90,6 +93,27 @@ export default {
           enableHighAccuracy: true
         }
       }).addTo(this.map)
+
+      // L.control.savetiles(baseLayer, {
+      //   zoomlevels: [13, 16], // optional zoomlevels to save, default current zoomlevel
+      //   confirm(layer, successCallback) {
+      //     // eslint-disable-next-line no-alert
+      //     if (window.confirm(`Save ${layer._tilesforSave.length}`)) {
+      //       successCallback();
+      //     }
+      //   },
+      //   confirmRemoval(layer, successCallback) {
+      //     // eslint-disable-next-line no-alert
+      //     if (window.confirm('Remove all the tiles?')) {
+      //       successCallback();
+      //     }
+      //   },
+      //   saveText:
+      //     '<i class="fa fa-download" aria-hidden="true" title="Save tiles"></i>',
+      //   rmText: '<i class="fa fa-trash" aria-hidden="true"  title="Remove tiles"></i>',
+      // });
+      // control.addTo(map);
+
     },
     setupStartTiles() {
       const startZoomBounds = L.latLngBounds(
@@ -98,19 +122,18 @@ export default {
       )
       window.map = this.map
 
-      this.setupTiles(startZoomBounds)
-    },
-    setupTiles(zoomBounds) {
-      this.map.eachLayer((layer) => this.map.removeLayer(layer))
+      // this.map.eachLayer((layer) => this.map.removeLayer(layer))
 
       const tileOptions = {
         maxNativeZoom: 9,
         minNativeZoom: 8,
       }
       const mapsApiUrl = `/api/maps?y={y}&x={x}&z={z}`
+      this.mapLayer = L.tileLayer(mapsApiUrl, tileOptions).addTo(this.map)
 
-      L.tileLayer(mapsApiUrl, tileOptions).addTo(this.map)
-
+      this.zoomTo(startZoomBounds)
+    },
+    zoomTo(zoomBounds) {
       this.map.fitBounds(zoomBounds)
     },
     onLatlngChange() {
@@ -120,7 +143,7 @@ export default {
 
         const zoomBounds = L.latLngBounds(this.latlng)
 
-        this.setupTiles(zoomBounds)
+        this.zoomTo(zoomBounds)
         L.geoJSON(turf.flip(data), {
           style: () => {
             return {
