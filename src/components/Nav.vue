@@ -36,6 +36,12 @@
         >
           My routes
         </router-link>
+        <router-link
+          class="navbar-item"
+          to="/plan"
+        >
+          OS & heatmap route planner
+        </router-link>
       </div>
     </div>
   </nav>

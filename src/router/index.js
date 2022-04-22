@@ -4,8 +4,8 @@ import axios from 'axios'
 
 import Home from '../views/About'
 import SharedActivity from '../views/SharedActivity'
-import {store, mutations} from '@/store'
-import {dbAuth, db} from '@/db'
+import { store, mutations } from '@/store'
+import { dbAuth, db } from '@/db'
 
 Vue.use(VueRouter)
 
@@ -46,7 +46,7 @@ const routes = [
   {
     path: '/redirect',
     beforeEnter: (to, from, next) => {
-      const {code} = to.query
+      const { code } = to.query
       axios
         .post('/api/token', {
           code,
@@ -88,6 +88,17 @@ const routes = [
     },
   },
   {
+    path: '/plan',
+    name: 'Plan a route',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Plan.vue'),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/:id',
     name: 'Shared Activity',
     component: SharedActivity,
@@ -111,16 +122,16 @@ const routes = [
     props: () => {
       return {
         activity: store.sharedDocSnapshot.data(),
-        activitySnapshot: store.sharedDocSnapshot
+        activitySnapshot: store.sharedDocSnapshot,
       }
     },
   },
   {
     path: '/activity/:id',
-    redirect: to => {
+    redirect: (to) => {
       return `/${to.params.id}`
-    }
-  }
+    },
+  },
 ]
 
 const router = new VueRouter({
