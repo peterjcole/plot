@@ -17,6 +17,8 @@ import 'ol-geocoder/dist/ol-geocoder.min.css'
 import 'ol/ol.css'
 import 'ol-layerswitcher/dist/ol-layerswitcher.css'
 import LayerSwitcher from 'ol-layerswitcher'
+import { Control, FullScreen } from 'ol/control'
+import TileState from 'ol/TileState'
 
 export default {
   props: {
@@ -44,7 +46,30 @@ export default {
   },
   methods: {
     initialiseMap() {
-      // useGeographic()
+      class CookieControl extends Control {
+        constructor(opt_options) {
+          const options = opt_options || {}
+
+          const button = document.createElement('button')
+          button.innerHTML = '🍪'
+
+          const element = document.createElement('div')
+          element.className = 'cookie-control ol-unselectable ol-control'
+          element.appendChild(button)
+
+          super({
+            element: element,
+            target: options.target,
+          })
+
+          button.addEventListener('click', this.cookiePrompt, false)
+        }
+
+        cookiePrompt() {
+          const cookie = window.prompt('Enter Strava cookie', localStorage.getItem('heatmapCookie') || '')
+          localStorage.setItem('heatmapCookie', cookie)
+        }
+      }
 
       proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs')
       register(proj4)
@@ -55,49 +80,84 @@ export default {
         minZoom: 8,
       })
 
-      const getStravaUrl = activityType => `https://heatmap-external-b.strava.com/tiles/${activityType}/bluered/{z}/{x}/{y}.png?v=19`
+      const getStravaUrl = (activityType) => `https://heatmap-external-b.strava.com/tiles/${activityType}/bluered/{z}/{x}/{y}.png?v=19`
 
-      const stravaTileGrid = new WMTS({
+      let heatmapResolutions = [
+        156543.033928041,
+        78271.51696402048,
+        39135.75848201023,
+        19567.87924100512,
+        9783.93962050256,
+        4891.96981025128,
+        2445.98490512564,
+        1222.99245256282,
+        611.49622628141,
+        305.7481131407048,
+        152.8740565703525,
+        76.43702828517624,
+        38.21851414258813,
+        19.10925707129406,
+        9.554628535647032,
+        4.777314267823516,
+        2.388657133911758,
+        1.194328566955879,
+        0.5971642834779395,
+        0.29858214173896974,
+        0.14929107086948487,
+      ]
+
+      const stravaLowResTileGrid = new WMTS({
         tileSize: 256,
         extent: [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
-        resolutions: [
-          156543.033928041,
-          78271.51696402048,
-          39135.75848201023,
-          19567.87924100512,
-          9783.93962050256,
-          4891.96981025128,
-          2445.98490512564,
-          1222.99245256282,
-          611.49622628141,
-          305.7481131407048,
-          152.8740565703525,
-          76.43702828517624,
-          38.21851414258813,
-          19.10925707129406,
-          9.554628535647032,
-          4.777314267823516,
-          2.388657133911758,
-          1.194328566955879,
-          0.5971642834779395,
-          0.29858214173896974,
-          0.14929107086948487,
-        ].slice(0, 12),
+        resolutions: heatmapResolutions.slice(0, 12),
       })
+
+      const stravaHighResTileGrid = new WMTS({
+        tilePixelRatio: 2,
+        extent: [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+        resolutions: heatmapResolutions,
+      })
+
+      const stravaHighResLoader = (tile, src) => {
+        const client = new XMLHttpRequest()
+        client.open('GET', src)
+        client.responseType = 'blob'
+        client.setRequestHeader('heatmap-cookie', localStorage.getItem('heatmapCookie'))
+        client.addEventListener('loadend', function() {
+          const data = this.response
+          if (data !== undefined) {
+            tile.getImage().src = URL.createObjectURL(data)
+          } else {
+            tile.setState(TileState.ERROR)
+          }
+        })
+        client.send()
+      }
 
       const getStravaLayer = (title, activityType, visible) => new TileLayer({
         title,
         visible,
         source: new XYZ({
           url: getStravaUrl(activityType),
-          tileGrid: stravaTileGrid,
+          tileGrid: stravaLowResTileGrid,
         }),
+      })
+
+      const getStravaHighResLayer = (title, activityType, visible) => new TileLayer({
+        title,
+        visible,
+        source: new XYZ({
+          url: `/api/heatmap?y={y}&x={x}&z={z}&activityType=${activityType}`,
+          tileGrid: stravaHighResTileGrid,
+          tileLoadFunction: stravaHighResLoader,
+        }),
+        opacity: 0.75,
       })
 
       const stravaLayers = new Group({
         title: 'Strava heatmap (low res)',
         layers: [
-          getStravaLayer('Run', 'run', true),
+          getStravaLayer('Run', 'run', false),
           getStravaLayer('Ride', 'ride', false),
           getStravaLayer('Winter', 'winter', false),
           getStravaLayer('Water', 'water', false),
@@ -105,9 +165,19 @@ export default {
         ],
       })
 
+      const stravaHighResLayers = new Group({
+        title: 'Strava heatmap (high res, requires cookie)',
+        layers: [
+          getStravaHighResLayer('Run', 'run', true),
+          getStravaHighResLayer('Ride', 'ride', false),
+          getStravaHighResLayer('Winter', 'winter', false),
+          getStravaHighResLayer('Water', 'water', false),
+          getStravaHighResLayer('All', 'all', false),
+        ],
+      })
 
-      this.map = new Map({
-        target: 'map',
+      const osLayers = new Group({
+        title: 'Base maps',
         layers: [
           new TileLayer({
             title: 'OS Explorer 1:25000',
@@ -128,20 +198,7 @@ export default {
             }),
             // minZoom: 8,
           }),
-          stravaLayers,
         ],
-        view: new View({
-          projection: 'EPSG:27700',
-          extent: [-238375.0, 0.0, 900000.0, 1376256.0],
-          resolutions: osTileGrid.getResolutions(),
-          // minZoom: 0,
-          // maxZoom: 9,
-          center: [337297, 503695],
-          // center: [-2.9374139555606513, 54.44259993088727],
-          zoom: 7,
-          minZoom: 6,
-          // maxZoom: 9,
-        }),
       })
 
       const geocoder = new Geocoder('nominatim', {
@@ -152,14 +209,38 @@ export default {
         keepOpen: true,
       })
 
-      this.map.addControl(geocoder)
-
       const layerSwitcher = new LayerSwitcher({
         reverse: true,
         groupSelectStyle: 'group',
       })
 
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          osLayers,
+          stravaLayers,
+          stravaHighResLayers,
+        ],
+        view: new View({
+          projection: 'EPSG:27700',
+          extent: [-238375.0, 0.0, 900000.0, 1376256.0],
+          resolutions: osTileGrid.getResolutions(),
+          // minZoom: 0,
+          // maxZoom: 9,
+          center: [337297, 503695],
+          // TODO: Put this back to 7
+          zoom: 8,
+          minZoom: 6,
+          // maxZoom: 9,
+          enableRotation: false,
+        }),
+      })
+
+
+      this.map.addControl(geocoder)
       this.map.addControl(layerSwitcher)
+      this.map.addControl(new FullScreen())
+      this.map.addControl(new CookieControl())
     },
     setupStartTiles() {
       // const startZoomBounds = L.latLngBounds(
@@ -213,9 +294,10 @@ export default {
   z-index: 0;
 }
 
-.leaflet-control-geosearch {
-  position: absolute;
-  right: 0;
-  margin: 10px;
+.cookie-control {
+  left: 0.5em;
+  top: 6.2em;
+  font-size: 1rem;
+  padding: 2px;
 }
 </style>
