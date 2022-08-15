@@ -10,7 +10,7 @@ $navbar-item-hover-color: $primary;
 
 .box {
   &.activity-list {
-    height: 75vh;
+    height: 90vh;
     padding: 0.75rem;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -20,8 +20,9 @@ $navbar-item-hover-color: $primary;
   }
 
   &.map {
-    height: 75vh;
+    height: 90vh;
     padding: 0.75rem;
+    margin-bottom: 150px;
 
     @include mobile {
       height: 83vh;

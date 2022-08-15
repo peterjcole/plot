@@ -1,13 +1,13 @@
 <template>
   <nav
-    class="navbar"
+    class="navbar main-nav"
     role="navigation"
     aria-label="main navigation"
   >
     <div class="navbar-brand">
       <router-link
         class="navbar-item"
-        to="/"
+        to="/about"
       >
         <h4 class="is-4 title">
           <FontAwesomeIcon icon="map" />&nbsp;
@@ -20,12 +20,6 @@
       <div class="navbar-start">
         <router-link
           class="navbar-item"
-          to="/about"
-        >
-          About
-        </router-link>
-        <router-link
-          class="navbar-item"
           to="/"
         >
           My activities
@@ -35,6 +29,12 @@
           to="/routes"
         >
           My routes
+        </router-link>
+        <router-link
+          class="navbar-item"
+          to="/plan"
+        >
+          Heatmap & planner
         </router-link>
       </div>
     </div>
@@ -57,5 +57,11 @@ export default {
   },
 }
 </script>
+<style lang="scss" scoped>
+.main-nav {
+  overflow-x: auto;
+  width: 100%;
+}
+</style>
 
 
