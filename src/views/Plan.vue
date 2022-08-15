@@ -4,8 +4,9 @@
       <div class="hero-body">
         <div class="container">
           <h1 class="title is-1">
-            Plan a route
+            Heatmap
           </h1>
+          <p>Click the 🗺 icon to choose a heatmap layer.</p>
         </div>
       </div>
     </section>

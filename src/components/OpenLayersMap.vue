@@ -160,7 +160,7 @@ export default {
         title: 'Strava heatmap (low res)',
         visible: false,
         layers: [
-          getStravaLayer('Run', 'run', false),
+          getStravaLayer('Run', 'run', true),
           getStravaLayer('Ride', 'ride', false),
           getStravaLayer('Winter', 'winter', false),
           getStravaLayer('Water', 'water', false),
@@ -171,7 +171,7 @@ export default {
       const stravaHighResLayers = new Group({
         title: 'Strava heatmap (high res, requires cookie)',
         layers: [
-          getStravaHighResLayer('Run', 'run', true),
+          getStravaHighResLayer('Run', 'run', false),
           getStravaHighResLayer('Ride', 'ride', false),
           getStravaHighResLayer('Winter', 'winter', false),
           getStravaHighResLayer('Water', 'water', false),
