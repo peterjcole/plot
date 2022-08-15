@@ -1,5 +1,39 @@
 <template>
-  <div id="map" />
+  <div class="container">
+    <div class="block">
+      <div class="level">
+        <div class="level-left buttons">
+          <button
+            class="button"
+            @click="startDraw"
+          >
+            Draw new route (double click to finish)
+          </button>
+          <button
+            class="button"
+            @click="undo"
+          >
+            Undo last point
+          </button>
+          <button
+            class="button"
+            @click="exportGpx"
+          >
+            Export GPX
+          </button>
+        </div>
+        <div class="level-right">
+          <button
+            class="button"
+            @click="cookiePrompt"
+          >
+            Enter Strava cookie
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="map" />
+  </div>
 </template>
 
 <script>
@@ -19,8 +53,13 @@ import 'ol-geocoder/dist/ol-geocoder.min.css'
 import 'ol/ol.css'
 import 'ol-layerswitcher/dist/ol-layerswitcher.css'
 import LayerSwitcher from 'ol-layerswitcher'
-import { Control, FullScreen, ZoomToExtent } from 'ol/control'
+import { FullScreen, ZoomToExtent } from 'ol/control'
 import TileState from 'ol/TileState'
+import { Draw } from 'ol/interaction'
+import VectorSource from 'ol/source/Vector'
+import VectorLayer from 'ol/layer/Vector'
+import { Stroke, Style } from 'ol/style'
+import { GPX } from 'ol/format'
 
 export default {
   props: {
@@ -36,6 +75,8 @@ export default {
       locationMarker: null,
       locationCircle: null,
       locateLayer: null,
+      draw: null,
+      drawSource: null,
     }
   },
   watch: {
@@ -48,37 +89,9 @@ export default {
   },
   methods: {
     initialiseMap() {
-      class CookieControl extends Control {
-        constructor(opt_options) {
-          const options = opt_options || {}
-
-          const button = document.createElement('button')
-          button.innerHTML = '🍪'
-
-          const element = document.createElement('div')
-          element.className = 'cookie-control ol-unselectable ol-control'
-          element.appendChild(button)
-
-          super({
-            element: element,
-            target: options.target,
-          })
-
-          button.addEventListener('click', this.cookiePrompt, false)
-        }
-
-        cookiePrompt() {
-          const cookie = window.prompt(
-            'Enter Strava cookie',
-            localStorage.getItem('heatmapCookie') || ''
-          )
-          localStorage.setItem('heatmapCookie', cookie)
-        }
-      }
-
       proj4.defs(
         'EPSG:27700',
-        '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs'
+        '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs',
       )
       register(proj4)
 
@@ -89,7 +102,7 @@ export default {
       })
 
       const getStravaUrl = (activityType) =>
-        `https://heatmap-external-b.strava.com/tiles/${activityType}/bluered/{z}/{x}/{y}.png?v=19`
+        `https://heatmap-external-b.strava.com/tiles/${activityType}/purple/{z}/{x}/{y}.png?v=19`
 
       const heatmapResolutions = [
         156543.033928041, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.93962050256,
@@ -120,7 +133,7 @@ export default {
         client.open('GET', src)
         client.responseType = 'blob'
         client.setRequestHeader('heatmap-cookie', localStorage.getItem('heatmapCookie'))
-        client.addEventListener('loadend', function () {
+        client.addEventListener('loadend', function() {
           const data = this.response
           if (data !== undefined) {
             tile.getImage().src = URL.createObjectURL(data)
@@ -204,6 +217,20 @@ export default {
         ],
       })
 
+      this.drawSource = new VectorSource({ wrapX: true, format: new GPX() })
+
+      const drawLayer = new VectorLayer({
+        source: this.drawSource,
+        style: new Style({
+          stroke: new Stroke(
+            {
+              color: '#FC4C02',
+              width: 3,
+            },
+          ),
+        }),
+      })
+
       const geocoder = new Geocoder('nominatim', {
         provider: 'osm',
         placeholder: 'Search for an address',
@@ -216,12 +243,12 @@ export default {
         const lat = Number.parseFloat(localStorage.getItem('olLat'))
         const lng = Number.parseFloat(localStorage.getItem('olLng'))
 
-          return lat && lng ? [lat, lng] : [337297, 503695]
+        return lat && lng ? [lat, lng] : [337297, 503695]
       }
 
       this.map = new Map({
         target: 'map',
-        layers: [osLayers, stravaLayers, stravaHighResLayers],
+        layers: [osLayers, stravaLayers, stravaHighResLayers, drawLayer],
         view: new View({
           projection: 'EPSG:27700',
           extent: [-238375.0, 0.0, 900000.0, 1376256.0],
@@ -250,7 +277,7 @@ export default {
 
       const extent = createEmpty()
 
-      geolocation.on('change:accuracyGeometry', function () {
+      geolocation.on('change:accuracyGeometry', function() {
         geolocation.getAccuracyGeometry().getExtent(extent)
       })
 
@@ -263,7 +290,6 @@ export default {
       this.map.addControl(geocoder)
       this.map.addControl(layerSwitcher)
       this.map.addControl(new FullScreen())
-      this.map.addControl(new CookieControl())
       this.map.addControl(zoomToExtentControl)
 
       this.map.on('moveend', () => {
@@ -272,53 +298,75 @@ export default {
         localStorage.setItem('olLng', lng)
       })
     },
-    setupStartTiles() {
-      // const startZoomBounds = L.latLngBounds(
-      //   L.latLng(54.44259993088727, -2.9374139555606513),
-      //   L.latLng(54.416359041392084, -2.9817969157636037)
-      // )
-      // window.map = this.map
-      //
-      // this.setupTiles(startZoomBounds)
+    cookiePrompt() {
+      const cookie = window.prompt(
+        'Enter Strava cookie',
+        localStorage.getItem('heatmapCookie') || '',
+      )
+      localStorage.setItem('heatmapCookie', cookie)
     },
-    setupTiles() {
-      // this.map.eachLayer((layer) => this.map.removeLayer(layer))
-      //
-      // const tileOptions = {
-      //   maxNativeZoom: 9,
-      //   minNativeZoom: 8,
-      // }
-      // const mapsApiUrl = `/api/maps?y={y}&x={x}&z={z}`
-      //
-      // L.tileLayer(mapsApiUrl, tileOptions).addTo(this.map)
-      //
-      // this.map.fitBounds(zoomBounds)
+    startDraw() {
+      this.drawSource.clear()
+
+      this.draw = new Draw({
+        source: this.drawSource,
+        type: 'LineString',
+      })
+
+      this.draw.on('drawstart', () => {
+        this.drawSource.clear()
+
+      })
+
+      this.draw.on('drawend', async () => {
+        // Prevent double click zooming
+        await new Promise(resolve => setTimeout(resolve, '10'))
+        this.map.removeInteraction(this.draw)
+      })
+
+      this.map.addInteraction(this.draw)
+
+
     },
-    onLatlngChange() {
-      // if (this.latlng) {
-      //   this.locateLayer.remove()
-      //   const data = turf.lineString(this.latlng)
-      //
-      //   const zoomBounds = L.latLngBounds(this.latlng)
-      //
-      //   this.setupTiles(zoomBounds)
-      //   L.geoJSON(turf.flip(data), {
-      //     style: () => {
-      //       return {
-      //         color: '#080357',
-      //         opacity: 0.5,
-      //         weight: 4,
-      //       }
-      //     },
-      //   }).addTo(this.map)
-      //   this.locateLayer.addTo(this.map)
-      // }
+    undo() {
+      this.draw.removeLastPoint()
+
+    },
+    exportGpx() {
+      const features = this.drawSource.getFeatures()
+
+      if (features?.length) {
+        const gpx = new GPX()
+        console.log()
+
+        const gpxString = gpx.writeFeatures(this.drawSource.getFeatures(), {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:27700',
+        })
+
+        const pom = document.createElement('a')
+        pom.setAttribute('href', 'data:application/gpx+xml;charset=utf-8,' + encodeURIComponent(gpxString))
+        pom.setAttribute('download', 'route.gpx')
+
+        if (document.createEvent) {
+          const event = document.createEvent('MouseEvents')
+          event.initEvent('click', true, true)
+          pom.dispatchEvent(event)
+        } else {
+          pom.click()
+        }
+      }
     },
   },
 }
 </script>
 
 <style lang="scss">
+.container {
+  height: 100%;
+  width: 100%;
+}
+
 #map {
   height: 100%;
   z-index: 0;
@@ -346,10 +394,10 @@ export default {
   }
 }
 
-.cookie-control,
 .geolocation-control {
   position: absolute;
   left: 0.5em;
+  top: 7.1em;
   height: 1.375em;
   width: 1.375em;
   padding: 0;
@@ -357,8 +405,6 @@ export default {
 
   button {
     position: revert;
-    width: 100%;
-    height: 100%;
     padding: 0;
     margin: 0;
   }
@@ -372,6 +418,7 @@ export default {
   .gcd-gl-btn {
     left: 0.15em;
     background-image: revert;
+
     &:after {
       content: '🔎';
     }
@@ -381,7 +428,7 @@ export default {
     font-size: 1.4em;
   }
 
-  ul.gcd-gl-result>li:nth-child(odd) {
+  ul.gcd-gl-result > li:nth-child(odd) {
     background-color: #eee;
   }
 }
@@ -395,10 +442,23 @@ export default {
     width: 1.375em;
     height: 1.375em;
     background-image: revert;
+
     &:after {
       content: '🗺'
     }
   }
+}
+
+.ol-touch .ol-full-screen {
+  right: 1.15em;
+}
+
+.ol-touch .layer-switcher {
+  top: 3.2em;
+}
+
+.ol-touch .geolocation-control {
+  top: 8.5em;
 }
 
 .ol-full-screen {
@@ -407,18 +467,6 @@ export default {
   right: 0.5em;
   padding: 0;
   margin: 0;
-  button {
-    width: 100%;
-    height: 100%;
-    font-size: 0.9em;
-  }
 }
 
-.cookie-control {
-  top: 6.2em;
-}
-
-.geolocation-control {
-  top: 7.9em;
-}
 </style>

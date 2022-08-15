@@ -31,10 +31,10 @@
           My routes
         </router-link>
         <router-link
-          class="navbar-item is-hidden-touch"
+          class="navbar-item"
           to="/plan"
         >
-          Heatmap
+          Heatmap & planner
         </router-link>
       </div>
     </div>
