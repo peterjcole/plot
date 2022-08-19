@@ -1,15 +1,34 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import { faMap, faRunning, faBiking, faShareAlt, faLink, faGripLines, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
+import {
+  faBiking,
+  faGripLines,
+  faLink,
+  faLocationArrow,
+  faMap,
+  faRunning,
+  faShareAlt,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons'
 import { faGithub, faStrava } from '@fortawesome/free-brands-svg-icons'
-import { library, dom } from '@fortawesome/fontawesome-svg-core'
+import { dom, library } from '@fortawesome/fontawesome-svg-core'
 
 import VueTimeago from 'vue-timeago'
 import Clipboard from 'v-clipboard'
 
-
-library.add(faMap, faRunning, faBiking, faShareAlt, faLink, faGithub, faStrava, faGripLines, faLocationArrow)
+library.add(
+  faMap,
+  faRunning,
+  faBiking,
+  faShareAlt,
+  faLink,
+  faGithub,
+  faStrava,
+  faGripLines,
+  faLocationArrow,
+  faTrash
+)
 dom.watch()
 
 Vue.config.productionTip = false
@@ -26,8 +45,8 @@ Vue.use(VueTimeago, {
   // So you can use all locales from it
   locales: {
     'zh-CN': require('date-fns/locale/zh_cn'),
-    ja: require('date-fns/locale/ja')
-  }
+    ja: require('date-fns/locale/ja'),
+  },
 })
 
 Vue.use(Clipboard)
@@ -37,7 +56,5 @@ Vue.directive('focus', {
   inserted: function (el) {
     // Focus the element
     el.focus()
-  }
+  },
 })
-
-

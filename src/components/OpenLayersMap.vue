@@ -1,36 +1,60 @@
 <template>
   <div class="container">
-    <div class="block">
-      <div class="level">
-        <div class="level-left buttons">
-          <button
-            class="button"
-            @click="startDraw"
+    <div class="level mb-3">
+      <div class="level-left mb-0">
+        <div class="field mb-0 mr-3 pl-1">
+          <input
+            id="switchExample"
+            v-model="drawMode"
+            type="checkbox"
+            name="switchExample"
+            class="switch is-rtl is-small"
           >
-            Draw new route (double click to finish)
-          </button>
-          <button
-            class="button"
-            @click="undo"
-          >
-            Undo last point
-          </button>
-          <button
-            class="button"
-            @click="exportGpx"
-          >
-            Export GPX
-          </button>
+          <label
+            for="switchExample"
+            class="pt-0"
+          >Draw mode</label>
         </div>
-        <div class="level-right">
-          <button
-            class="button"
-            @click="cookiePrompt"
-          >
-            Enter Strava cookie
-          </button>
-        </div>
+        <button
+          class="button mr-2 is-small"
+          @click="undo"
+        >
+          Undo
+        </button>
+        <button
+          class="button mr-2 is-small"
+          @click="handleExportGpxClick"
+        >
+          Export GPX
+        </button>
+        <button
+          class="button is-small is-danger is-light"
+          @click="clearRoute"
+        >
+          <span class="icon">
+            <i class="fas fa-trash" />
+          </span>
+          <span>Clear route</span>
+        </button>
       </div>
+      <div class="level-right mb-0">
+        <button
+          class="button is-small"
+          @click="cookiePrompt"
+        >
+          Enter Strava cookie
+        </button>
+      </div>
+    </div>
+    <div
+      class="level mb-3"
+    >
+      <span class="icon-text tag is-light">
+        <span class="icon">
+          <i class="fas fa-location-arrow" />
+        </span>
+        <span>Route distance: {{ formattedLength }}</span>
+      </span>
     </div>
     <div id="map" />
   </div>
@@ -55,11 +79,12 @@ import 'ol-layerswitcher/dist/ol-layerswitcher.css'
 import LayerSwitcher from 'ol-layerswitcher'
 import { FullScreen, ZoomToExtent } from 'ol/control'
 import TileState from 'ol/TileState'
-import { Draw } from 'ol/interaction'
+import { Draw, Modify, Snap } from 'ol/interaction'
 import VectorSource from 'ol/source/Vector'
 import VectorLayer from 'ol/layer/Vector'
 import { Stroke, Style } from 'ol/style'
 import { GPX } from 'ol/format'
+import { getLength } from 'ol/sphere'
 
 export default {
   props: {
@@ -76,13 +101,32 @@ export default {
       locationCircle: null,
       locateLayer: null,
       draw: null,
+      drawMode: false,
       drawSource: null,
+      drawLength: null,
+      exportingGpx: false
+    }
+  },
+  computed: {
+    formattedLength() {
+        if (this.drawLength > 100) {
+          return Math.round((this.drawLength / 1000) * 100) / 100 + ' ' + 'km'
+        } else {
+          return Math.round(this.drawLength * 100) / 100 + ' ' + 'm'
+        }
     }
   },
   watch: {
     latlng() {
       this.onLatlngChange()
     },
+    drawMode(newDrawMode) {
+      if (newDrawMode) {
+        this.startDraw()
+      } else {
+        this.finishDrawing()
+      }
+    }
   },
   mounted() {
     this.initialiseMap()
@@ -219,6 +263,12 @@ export default {
 
       this.drawSource = new VectorSource({ wrapX: true, format: new GPX() })
 
+      this.drawSource.on('addfeature', () => {
+        if (this.exportingGpx) {
+          this.exportGpx()
+        }
+      })
+
       const drawLayer = new VectorLayer({
         source: this.drawSource,
         style: new Style({
@@ -306,30 +356,68 @@ export default {
       localStorage.setItem('heatmapCookie', cookie)
     },
     startDraw() {
-      this.drawSource.clear()
-
       this.draw = new Draw({
         source: this.drawSource,
+        finishCondition: () => false,
         type: 'LineString',
       })
 
-      this.draw.on('drawstart', () => {
-        this.drawSource.clear()
+      const existingFeature = this.drawSource.getFeatures()[0]
 
+      if (existingFeature) {
+        this.draw.extend(existingFeature)
+      }
+
+      this.draw.on('drawstart', ({feature}) => {
+        feature.getGeometry().on('change', ({target}) => {
+          this.drawLength = getLength(target)
+        })
       })
 
       this.draw.on('drawend', async () => {
         // Prevent double click zooming
-        await new Promise(resolve => setTimeout(resolve, '10'))
+        // await new Promise(resolve => setTimeout(resolve, '10'))
         this.map.removeInteraction(this.draw)
+
+        this.drawMode = false
       })
 
       this.map.addInteraction(this.draw)
+      this.drawSource.clear()
 
 
+      const modify = new Modify({source: this.drawSource})
+      this.map.addInteraction(modify)
+
+      const snap = new Snap({source: this.drawSource})
+
+      this.map.addInteraction(snap)
     },
     undo() {
+      if (!this.drawMode) {
+        this.drawMode = true
+      }
       this.draw.removeLastPoint()
+    },
+    clearRoute() {
+      if (this.draw) {
+        this.finishDrawing()
+
+      }
+
+      this.drawSource.clear()
+    },
+    finishDrawing() {
+      this.draw.finishDrawing()
+    },
+    handleExportGpxClick() {
+      this.exportingGpx = true
+
+      if (this.drawMode) {
+        this.drawMode = false
+      } else {
+        this.exportGpx()
+      }
 
     },
     exportGpx() {
@@ -337,7 +425,6 @@ export default {
 
       if (features?.length) {
         const gpx = new GPX()
-        console.log()
 
         const gpxString = gpx.writeFeatures(this.drawSource.getFeatures(), {
           dataProjection: 'EPSG:4326',
@@ -356,8 +443,10 @@ export default {
           pom.click()
         }
       }
+
+      this.exportingGpx = false
     },
-  },
+  }
 }
 </script>
 
