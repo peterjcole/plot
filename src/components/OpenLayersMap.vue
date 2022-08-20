@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container map-container">
     <div class="level mb-3">
       <div class="level-left mb-0">
         <div class="field mb-0 mr-3 pl-1">
@@ -13,7 +13,7 @@
           <label
             for="switchExample"
             class="pt-0"
-          >Draw mode</label>
+          >Add points mode</label>
         </div>
         <button
           class="button mr-2 is-small"
@@ -82,9 +82,32 @@ import TileState from 'ol/TileState'
 import { Draw, Modify, Snap } from 'ol/interaction'
 import VectorSource from 'ol/source/Vector'
 import VectorLayer from 'ol/layer/Vector'
-import { Stroke, Style } from 'ol/style'
+import { Fill, Stroke, Style } from 'ol/style'
 import { GPX } from 'ol/format'
 import { getLength } from 'ol/sphere'
+import { Feature } from 'ol'
+import { Point } from 'ol/geom'
+import { throttle } from 'lodash/function'
+import CircleStyle from 'ol/style/Circle'
+
+const strokeStyleOptions = {
+  color: '#FC4C02',
+  width: 3,
+}
+
+const circleStrokeOptions = { color: '#BDD1DB', width: 2 }
+
+const circleStyleOptions = {
+  radius: 6,
+  fill: new Fill({ color: '#4E8098' }),
+  stroke: new Stroke(circleStrokeOptions),
+}
+
+const lineStyle = new Style({
+  stroke: new Stroke(strokeStyleOptions),
+  image: new CircleStyle(circleStyleOptions),
+})
+
 
 export default {
   props: {
@@ -104,17 +127,18 @@ export default {
       drawMode: false,
       drawSource: null,
       drawLength: null,
-      exportingGpx: false
+      verticesSource: null,
+      exportingGpx: false,
     }
   },
   computed: {
     formattedLength() {
-        if (this.drawLength > 100) {
-          return Math.round((this.drawLength / 1000) * 100) / 100 + ' ' + 'km'
-        } else {
-          return Math.round(this.drawLength * 100) / 100 + ' ' + 'm'
-        }
-    }
+      if (this.drawLength > 100) {
+        return Math.round((this.drawLength / 1000) * 100) / 100 + ' ' + 'km'
+      } else {
+        return Math.round(this.drawLength * 100) / 100 + ' ' + 'm'
+      }
+    },
   },
   watch: {
     latlng() {
@@ -126,7 +150,7 @@ export default {
       } else {
         this.finishDrawing()
       }
-    }
+    },
   },
   mounted() {
     this.initialiseMap()
@@ -267,19 +291,22 @@ export default {
         if (this.exportingGpx) {
           this.exportGpx()
         }
+
+        this.updateVertices()
       })
 
       const drawLayer = new VectorLayer({
         source: this.drawSource,
-        style: new Style({
-          stroke: new Stroke(
-            {
-              color: '#FC4C02',
-              width: 3,
-            },
-          ),
-        }),
+        style: lineStyle,
       })
+
+      this.verticesSource = new VectorSource({ wrapX: true })
+
+      const verticesLayer = new VectorLayer({
+        source: this.verticesSource,
+        style: lineStyle,
+      })
+
 
       const geocoder = new Geocoder('nominatim', {
         provider: 'osm',
@@ -298,7 +325,7 @@ export default {
 
       this.map = new Map({
         target: 'map',
-        layers: [osLayers, stravaLayers, stravaHighResLayers, drawLayer],
+        layers: [osLayers, stravaLayers, stravaHighResLayers, drawLayer, verticesLayer],
         view: new View({
           projection: 'EPSG:27700',
           extent: [-238375.0, 0.0, 900000.0, 1376256.0],
@@ -356,10 +383,20 @@ export default {
       localStorage.setItem('heatmapCookie', cookie)
     },
     startDraw() {
+      this.verticesSource.clear()
+
       this.draw = new Draw({
         source: this.drawSource,
-        finishCondition: () => false,
+        // finishCondition: () => false,
         type: 'LineString',
+        style: new Style({
+          stroke: new Stroke(strokeStyleOptions),
+          image: new CircleStyle({
+            ...circleStyleOptions,
+            radius: 4,
+            stroke: new Stroke({ ...circleStrokeOptions, width: 1 }),
+          }),
+        }),
       })
 
       const existingFeature = this.drawSource.getFeatures()[0]
@@ -368,28 +405,45 @@ export default {
         this.draw.extend(existingFeature)
       }
 
-      this.draw.on('drawstart', ({feature}) => {
-        feature.getGeometry().on('change', ({target}) => {
+      this.draw.on('drawstart', ({ feature }) => {
+        feature.getGeometry().on('change', ({ target }) => {
           this.drawLength = getLength(target)
         })
       })
 
       this.draw.on('drawend', async () => {
         // Prevent double click zooming
-        // await new Promise(resolve => setTimeout(resolve, '10'))
+        await new Promise(resolve => setTimeout(resolve, '10'))
         this.map.removeInteraction(this.draw)
 
         this.drawMode = false
+
       })
 
       this.map.addInteraction(this.draw)
       this.drawSource.clear()
 
 
-      const modify = new Modify({source: this.drawSource})
+      const modify = new Modify({
+        source: this.drawSource, style: new Style({
+          image: new CircleStyle({
+            radius: 8,
+            fill: new Fill({ color: '#FC4C02' }),
+            stroke: new Stroke({ color: '#FEC6AE', width: 2 }),
+          }),
+        }),
+      })
+
+      modify.on('modifystart', () => {
+        this.verticesSource.clear()
+      })
+
+      modify.on('modifyend', () => {
+        this.updateVertices()
+      })
       this.map.addInteraction(modify)
 
-      const snap = new Snap({source: this.drawSource})
+      const snap = new Snap({ source: this.drawSource })
 
       this.map.addInteraction(snap)
     },
@@ -402,14 +456,23 @@ export default {
     clearRoute() {
       if (this.draw) {
         this.finishDrawing()
-
       }
 
       this.drawSource.clear()
+      this.verticesSource.clear()
     },
     finishDrawing() {
       this.draw.finishDrawing()
     },
+    updateVertices: throttle(function() {
+      console.log('throttled')
+      this.verticesSource.clear()
+      this.drawSource.getFeatures()[0].getGeometry().getCoordinates().forEach(coordinates => {
+        this.verticesSource.addFeature(new Feature({
+          geometry: new Point(coordinates),
+        }))
+      })
+    }, 100, { leading: true }),
     handleExportGpxClick() {
       this.exportingGpx = true
 
@@ -446,19 +509,36 @@ export default {
 
       this.exportingGpx = false
     },
-  }
+  },
 }
 </script>
 
 <style lang="scss">
+@import '~bulma/bulma.sass';
+
+.map-container {
+  display: flex;
+  flex-direction: column;
+}
+
 .container {
   height: 100%;
   width: 100%;
 }
 
+.level-right {
+  @include until($tablet) {
+    margin-top: 0.75rem !important;
+  }
+}
+
+.map {
+  position: relative;
+}
+
 #map {
-  height: 100%;
-  z-index: 0;
+  flex: 1;
+  background-color: white;
 }
 
 .ol-control {
