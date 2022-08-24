@@ -2,16 +2,16 @@
   <div class="container map-container">
     <div class="level mb-3">
       <div class="level-left mb-0">
-        <div class="field mb-0 mr-3 pl-1">
+        <div class="field mb-0 mr-3 pl-1 switch-field">
           <input
-            id="switchExample"
+            id="add-switch"
             v-model="drawMode"
             type="checkbox"
-            name="switchExample"
+            name="add-switch"
             class="switch is-rtl is-small"
           >
           <label
-            for="switchExample"
+            for="add-switch"
             class="pt-0"
           >Add points mode</label>
         </div>
@@ -91,8 +91,9 @@ import { throttle } from 'lodash/function'
 import CircleStyle from 'ol/style/Circle'
 
 const strokeStyleOptions = {
-  color: '#FC4C02',
+  color: 'hsla(18, 98%, 50%, 0.8)',
   width: 3,
+  opacity: 0.8
 }
 
 const circleStrokeOptions = { color: '#BDD1DB', width: 2 }
@@ -460,9 +461,14 @@ export default {
 
       this.drawSource.clear()
       this.verticesSource.clear()
+      this.drawLength = 0
     },
     finishDrawing() {
-      this.draw.finishDrawing()
+      if(!this.drawLength) {
+        this.map.removeInteraction(this.draw)
+      } else {
+        this.draw.finishDrawing()
+      }
     },
     updateVertices: throttle(function() {
       console.log('throttled')
@@ -532,13 +538,18 @@ export default {
   }
 }
 
-.map {
-  position: relative;
+.switch-field {
+  @include until($tablet) {
+    margin-bottom: 0.75rem !important;
+  }
 }
 
 #map {
   flex: 1;
   background-color: white;
+  &, canvas, div {
+    touch-action: manipulation;
+  }
 }
 
 .ol-control {

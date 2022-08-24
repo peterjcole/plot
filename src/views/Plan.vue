@@ -13,7 +13,7 @@
     <div class="container">
       <div class="columns is-gapless">
         <div class="column">
-          <div class="box map">
+          <div class="box plan-map">
             <Map />
           </div>
         </div>
@@ -41,5 +41,15 @@ export default {
 </script>
 
 <style lang='scss' scoped>
+@import '~bulma/bulma.sass';
 
+.plan-map {
+  height: 100vh;
+  padding: 0.75rem;
+  margin-bottom: 150px;
+
+  @include from($tablet) {
+    height: 90vh;
+  }
+}
 </style>
