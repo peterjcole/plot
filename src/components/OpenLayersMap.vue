@@ -19,7 +19,7 @@
           class="button mr-2 is-small"
           @click="undo"
         >
-          Undo
+          Remove last point
         </button>
         <button
           class="button mr-2 is-small"
@@ -49,12 +49,41 @@
     <div
       class="level mb-3"
     >
-      <span class="icon-text tag is-light">
-        <span class="icon">
-          <i class="fas fa-location-arrow" />
-        </span>
-        <span>Route distance: {{ formattedLength }}</span>
-      </span>
+      <div class="is-flex is-align-items-center is-justify-content-space-between custom-level">
+        <div class="is-flex is-align-items-center custom-level">
+          <span class="icon-text tag is-light min-width-max-content">
+            <span class="icon">
+              <i class="fas fa-location-arrow" />
+            </span>
+            <span>Route distance: {{ formattedLength }}</span>
+          </span>
+          <span
+            v-if="!drawMode && drawLength"
+            class="icon-text tag is-light is-info"
+          >
+            <span class="icon">
+              <i class="fas fa-info-circle" />
+            </span>
+            <span>Drag a point or anywhere on the line to modify</span>
+          </span>
+        </div>
+        <div class="is-flex is-align-items-center custom-level is-justify-content-flex-end">
+          <span
+            class="icon-text tag is-light is-info min-width-max-content"
+          >
+            <span class="icon">
+              <i class="fas fa-info-circle" />
+            </span>
+            <span>Enter Strava cookie for high-res heatmap</span>
+          </span>
+          <router-link
+            to="/about-cookie"
+            class="is-link is-size-7 min-width-max-content"
+          >
+            More info
+          </router-link>
+        </div>
+      </div>
     </div>
     <div id="map" />
   </div>
@@ -155,6 +184,11 @@ export default {
   },
   mounted() {
     this.initialiseMap()
+    window.onbeforeunload = () => {
+      if (this.drawLength) {
+        return 'Are you sure you want to lose your route?'
+      }
+    }
   },
   methods: {
     initialiseMap() {
@@ -381,14 +415,25 @@ export default {
         'Enter Strava cookie',
         localStorage.getItem('heatmapCookie') || '',
       )
-      localStorage.setItem('heatmapCookie', cookie)
+      if (cookie) {
+        const isJOSMCookie = cookie.includes('https://')
+
+        if (isJOSMCookie) {
+          const searchParamsString = cookie.match(/.png?(.*)/)[1]
+          const searchParams = new URLSearchParams(searchParamsString)
+          const cookieString = `CloudFront-Policy=${searchParams.get('Policy')}; CloudFront-Key-Pair-Id=${searchParams.get('Key-Pair-Id')}; CloudFront-Signature=${searchParams.get('Signature')};`
+          localStorage.setItem('heatmapCookie', cookieString)
+        } else {
+          localStorage.setItem('heatmapCookie', cookie)
+        }
+      }
     },
     startDraw() {
       this.verticesSource.clear()
 
       this.draw = new Draw({
         source: this.drawSource,
-        // finishCondition: () => false,
+        finishCondition: () => false,
         type: 'LineString',
         style: new Style({
           stroke: new Stroke(strokeStyleOptions),
@@ -398,6 +443,7 @@ export default {
             stroke: new Stroke({ ...circleStrokeOptions, width: 1 }),
           }),
         }),
+        stopClick: true,
       })
 
       const existingFeature = this.drawSource.getFeatures()[0]
@@ -455,13 +501,16 @@ export default {
       this.draw.removeLastPoint()
     },
     clearRoute() {
-      if (this.draw) {
-        this.finishDrawing()
-      }
+      if (confirm('Are you sure you want to clear the route?')) {
+        if (this.draw) {
+          this.finishDrawing()
+        }
 
-      this.drawSource.clear()
-      this.verticesSource.clear()
-      this.drawLength = 0
+        this.drawSource.clear()
+        this.verticesSource.clear()
+        this.drawLength = 0
+
+      }
     },
     finishDrawing() {
       if(!this.drawLength) {
@@ -522,6 +571,15 @@ export default {
 <style lang="scss">
 @import '~bulma/bulma.sass';
 
+.custom-level {
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.min-width-max-content {
+  min-width: max-content;
+}
+
 .map-container {
   display: flex;
   flex-direction: column;
@@ -547,9 +605,6 @@ export default {
 #map {
   flex: 1;
   background-color: white;
-  &, canvas, div {
-    touch-action: manipulation;
-  }
 }
 
 .ol-control {
@@ -639,6 +694,10 @@ export default {
 
 .ol-touch .geolocation-control {
   top: 8.5em;
+}
+
+.ol-touch .ol-geocoder {
+  left: 0.3em;
 }
 
 .ol-full-screen {

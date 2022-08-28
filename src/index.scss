@@ -9,11 +9,6 @@ $navbar-item-hover-color: $primary;
 @import '~leaflet-geosearch/dist/geosearch.css';
 @import '~bulma-switch';
 
-body {
-  // Attempt to prevent double tap to zoom on mobile/tablet
-  touch-action: manipulation;
-}
-
 .box {
   &.activity-list {
     height: 90vh;

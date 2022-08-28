@@ -3,9 +3,10 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 
 import Home from '../views/About'
+import AboutCookie from '../views/AboutCookie'
 import SharedActivity from '../views/SharedActivity'
-import { store, mutations } from '@/store'
-import { dbAuth, db } from '@/db'
+import { mutations, store } from '@/store'
+import { db, dbAuth } from '@/db'
 
 Vue.use(VueRouter)
 
@@ -14,6 +15,14 @@ const routes = [
     path: '/about',
     name: 'Home',
     component: Home,
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/about-cookie',
+    name: 'About Strava Cookie',
+    component: AboutCookie,
     meta: {
       requiresAuth: false,
     },

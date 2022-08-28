@@ -4,6 +4,7 @@ import router from './router'
 import {
   faBiking,
   faGripLines,
+  faInfoCircle,
   faLink,
   faLocationArrow,
   faMap,
@@ -27,7 +28,8 @@ library.add(
   faStrava,
   faGripLines,
   faLocationArrow,
-  faTrash
+  faTrash,
+  faInfoCircle
 )
 dom.watch()
 
