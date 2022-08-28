@@ -14,7 +14,7 @@
       <div class="columns is-gapless">
         <div class="column">
           <div class="box plan-map">
-            <Map />
+            <Map ref="map" />
           </div>
         </div>
       </div>
@@ -29,6 +29,14 @@ export default {
   name: 'Plan',
   components: {
     Map,
+  },
+  beforeRouteLeave (to, from, next) {
+    console.log('before route leave')
+    if (this.$refs.map.drawLength && !confirm('Are you sure you want to lose your route?')) {
+      return false
+    } else {
+      next()
+    }
   },
   data: () => {
     return {}
