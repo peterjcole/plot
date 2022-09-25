@@ -205,7 +205,7 @@ export default {
       })
 
       const getStravaUrl = (activityType) =>
-        `https://heatmap-external-b.strava.com/tiles/${activityType}/purple/{z}/{x}/{y}.png?v=19`
+        `https://heatmap-external-b.strava.com/tiles/${activityType}/blue/{z}/{x}/{y}.png?v=19`
 
       const heatmapResolutions = [
         156543.033928041, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.93962050256,
