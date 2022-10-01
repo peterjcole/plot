@@ -159,6 +159,8 @@ export default {
       drawLength: null,
       verticesSource: null,
       exportingGpx: false,
+      lowResLayers: null,
+      highResLayers: null,
     }
   },
   computed: {
@@ -191,7 +193,7 @@ export default {
     }
   },
   methods: {
-    initialiseMap() {
+    async initialiseMap() {
       proj4.defs(
         'EPSG:27700',
         '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs',
@@ -247,8 +249,8 @@ export default {
         client.send()
       }
 
-      const getStravaLayer = (title, activityType, visible) =>
-        new TileLayer({
+      const getStravaLayer = (title, activityType, visible) => {
+        const tileLayer = new TileLayer({
           title,
           visible,
           source: new XYZ({
@@ -257,8 +259,16 @@ export default {
           }),
         })
 
-      const getStravaHighResLayer = (title, activityType, visible) =>
-        new TileLayer({
+        tileLayer.on('change:visible', (event) => {
+          if (event.target.get(event.key) === true) {
+            localStorage.setItem('olHeatmapLayer', event.target.get('title'))
+          }
+        })
+        return tileLayer
+      }
+
+      const getStravaHighResLayer = (title, activityType, visible) => {
+        const tileLayer = new TileLayer({
           title,
           visible,
           source: new XYZ({
@@ -272,11 +282,20 @@ export default {
           opacity: 0.75,
         })
 
-      const stravaLayers = new Group({
+        tileLayer.on('change:visible', (event) => {
+          if (event.target.get(event.key) === true) {
+            localStorage.setItem('olHeatmapLayer', event.target.get('title'))
+          }
+        })
+
+        return tileLayer
+      }
+
+      this.lowResLayers = new Group({
         title: 'Strava heatmap (low res)',
         visible: false,
         layers: [
-          getStravaLayer('Run', 'run', true),
+          getStravaLayer('Run', 'run', false),
           getStravaLayer('Ride', 'ride', false),
           getStravaLayer('Winter', 'winter', false),
           getStravaLayer('Water', 'water', false),
@@ -284,7 +303,7 @@ export default {
         ],
       })
 
-      const stravaHighResLayers = new Group({
+      this.highResLayers = new Group({
         title: 'Strava heatmap (high res, requires cookie)',
         layers: [
           getStravaHighResLayer('Run', 'run', false),
@@ -360,7 +379,7 @@ export default {
 
       this.map = new Map({
         target: 'map',
-        layers: [osLayers, stravaLayers, stravaHighResLayers, drawLayer, verticesLayer],
+        layers: [osLayers, this.lowResLayers, this.highResLayers, drawLayer, verticesLayer],
         view: new View({
           projection: 'EPSG:27700',
           extent: [-238375.0, 0.0, 900000.0, 1376256.0],
@@ -404,13 +423,34 @@ export default {
       this.map.addControl(new FullScreen())
       this.map.addControl(zoomToExtentControl)
 
+      await this.setVisibleLayer()
+
       this.map.on('moveend', () => {
         const [lat, lng] = this.map.getView().getCenter()
         localStorage.setItem('olLat', lat)
         localStorage.setItem('olLng', lng)
       })
     },
-    cookiePrompt() {
+    async setVisibleLayer() {
+      const testResponse = await fetch('/api/status', {headers: {'heatmap-cookie': localStorage.getItem('heatmapCookie')}})
+
+      const layerName = localStorage.getItem('olHeatmapLayer') || 'Run'
+
+      if (testResponse.ok) {
+        this.highResLayers.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
+      } else {
+        if (localStorage.getItem('heatmapCookie')) {
+          alert('Your Strava cookie is invalid or has expired')
+          localStorage.removeItem('heatmapCookie')
+        }
+        this.lowResLayers.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
+      }
+    },
+    hideAllStravaLayers() {
+      this.highResLayers.getLayers().getArray().forEach(layer => layer.setVisible(false))
+      this.lowResLayers.getLayers().getArray().forEach(layer => layer.setVisible(false))
+    },
+    async cookiePrompt() {
       const cookie = window.prompt(
         'Enter Strava cookie',
         localStorage.getItem('heatmapCookie') || '',
@@ -426,6 +466,8 @@ export default {
         } else {
           localStorage.setItem('heatmapCookie', cookie)
         }
+        this.hideAllStravaLayers()
+        await this.setVisibleLayer()
       }
     },
     startDraw() {
