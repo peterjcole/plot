@@ -314,6 +314,8 @@ export default {
         ],
       })
 
+      this.setVisibleLayer()
+
       const osLayers = new Group({
         title: 'Base maps',
         layers: [
@@ -423,8 +425,6 @@ export default {
       this.map.addControl(new FullScreen())
       this.map.addControl(zoomToExtentControl)
 
-      await this.setVisibleLayer()
-
       this.map.on('moveend', () => {
         const [lat, lng] = this.map.getView().getCenter()
         localStorage.setItem('olLat', lat)
@@ -436,14 +436,20 @@ export default {
 
       const layerName = localStorage.getItem('olHeatmapLayer') || 'Run'
 
+      const layers = this.map.getLayers().getArray()
+
       if (testResponse.ok) {
-        this.highResLayers.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
+        const highResGroup = layers.find(layer => layer.getProperties().title === 'Strava heatmap (high res, requires cookie)')
+        highResGroup.setVisible(true)
+        highResGroup.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
       } else {
         if (localStorage.getItem('heatmapCookie')) {
           alert('Your Strava cookie is invalid or has expired')
           localStorage.removeItem('heatmapCookie')
         }
-        this.lowResLayers.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
+        const lowResGroup = layers.find(layer => layer.getProperties().title === 'Strava heatmap (low res)')
+        lowResGroup.setVisible(true)
+        lowResGroup.getLayers().getArray().find(layer => layer.getProperties().title === layerName)?.setVisible(true)
       }
     },
     hideAllStravaLayers() {
