@@ -1,7 +1,7 @@
 <template>
   <div class="container map-container">
-    <div class="level mb-3">
-      <div class="level-left mb-0">
+    <div class="level mb-3 is-flex-wrap-wrap	">
+      <div class="level-left mb-2 mr-2">
         <div class="field mb-0 mr-3 pl-1 switch-field">
           <input
             id="add-switch"
@@ -37,12 +37,26 @@
           <span>Clear route</span>
         </button>
       </div>
-      <div class="level-right mb-0">
+      <div class="level-right mb-2">
         <button
-          class="button is-small"
+          class="button is-small mr-1"
           @click="cookiePrompt"
         >
-          Enter Strava cookie
+          Enter Global heatmap cookies
+        </button>
+
+        <button
+          class="button is-small mr-1"
+          @click="sessionCookiePrompt"
+        >
+          Enter Strava session cookie
+        </button>
+
+        <button
+          class="button is-small"
+          @click="userIdPrompt"
+        >
+          Enter Strava user ID
         </button>
       </div>
     </div>
@@ -161,6 +175,7 @@ export default {
       exportingGpx: false,
       lowResLayers: null,
       highResLayers: null,
+      personalLayers: null
     }
   },
   computed: {
@@ -233,6 +248,23 @@ export default {
         // tileSize: 512,
       })
 
+      const stravaPersonalLoader = (tile, src) => {
+        const client = new XMLHttpRequest()
+        client.open('GET', src)
+        client.responseType = 'blob'
+        client.setRequestHeader('session-cookie', localStorage.getItem('sessionCookie'))
+        client.setRequestHeader('user-id', localStorage.getItem('userId'))
+        client.addEventListener('loadend', function() {
+          const data = this.response
+          if (data !== undefined) {
+            tile.getImage().src = URL.createObjectURL(data)
+          } else {
+            tile.setState(TileState.ERROR)
+          }
+        })
+        client.send()
+      }
+
       const stravaHighResLoader = (tile, src) => {
         const client = new XMLHttpRequest()
         client.open('GET', src)
@@ -291,6 +323,30 @@ export default {
         return tileLayer
       }
 
+      const getStravaPersonalLayer = (title, activityType, visible) => {
+        const tileLayer = new TileLayer({
+          title,
+          visible,
+          source: new XYZ({
+            url: `/api/personal-heatmap?y={y}&x={x}&z={z}&activityType=${activityType}`,
+            tileGrid: stravaHighResTileGrid,
+            tileLoadFunction: stravaPersonalLoader,
+            tilePixelRatio: 2,
+            maxZoom: 15,
+            // tileSize: 512,
+          }),
+          opacity: 0.75,
+        })
+
+        tileLayer.on('change:visible', (event) => {
+          if (event.target.get(event.key) === true) {
+            localStorage.setItem('olHeatmapLayer', event.target.get('title'))
+          }
+        })
+
+        return tileLayer
+      }
+
       this.lowResLayers = new Group({
         title: 'Strava heatmap (low res)',
         visible: false,
@@ -311,6 +367,17 @@ export default {
           getStravaHighResLayer('Winter', 'winter', false),
           getStravaHighResLayer('Water', 'water', false),
           getStravaHighResLayer('All', 'all', false),
+        ],
+      })
+
+      this.personalLayers = new Group({
+        title: 'Strava personal heatmap (requires session cookie)',
+        layers: [
+          getStravaPersonalLayer('Run', 'run', false),
+          getStravaPersonalLayer('Ride', 'ride', false),
+          getStravaPersonalLayer('Winter', 'winter', false),
+          getStravaPersonalLayer('Water', 'water', false),
+          getStravaPersonalLayer('All', 'all', false),
         ],
       })
 
@@ -381,7 +448,7 @@ export default {
 
       this.map = new Map({
         target: 'map',
-        layers: [osLayers, this.lowResLayers, this.highResLayers, drawLayer, verticesLayer],
+        layers: [osLayers, this.lowResLayers, this.highResLayers, this.personalLayers, drawLayer, verticesLayer],
         view: new View({
           projection: 'EPSG:27700',
           extent: [-238375.0, 0.0, 900000.0, 1376256.0],
@@ -474,6 +541,24 @@ export default {
         }
         this.hideAllStravaLayers()
         await this.setVisibleLayer()
+      }
+    },
+    async sessionCookiePrompt() {
+      const cookie = window.prompt(
+        'Enter Session cookie',
+        localStorage.getItem('sessionCookie') || '',
+      )
+      if (cookie) {
+          localStorage.setItem('sessionCookie', cookie)
+      }
+    },
+    async userIdPrompt() {
+      const userId = window.prompt(
+        'Enter Strava user ID',
+        localStorage.getItem('userId') || '',
+      )
+      if (userId) {
+        localStorage.setItem('userId', userId)
       }
     },
     startDraw() {
