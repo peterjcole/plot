@@ -128,7 +128,7 @@ export default {
     },
     onLatlngChange() {
       if (this.latlng) {
-        this.locateLayer.remove()
+        this.locateLayer?.remove()
         const data = turf.lineString(this.latlng)
 
         const zoomBounds = L.latLngBounds(this.latlng)
@@ -143,7 +143,7 @@ export default {
             }
           },
         }).addTo(this.map)
-        this.locateLayer.addTo(this.map)
+        this.locateLayer?.addTo(this.map)
       }
     },
   },
