@@ -41,7 +41,7 @@
         </div>
         <div class="column">
           <div class="box map">
-            <Map :latlng="selectedLatlng" />
+            <TheMap :latlng="selectedLatlng" />
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@ import InfiniteLoading from 'vue-infinite-loading'
 
 import ListItem from '@/components/ListItem'
 import ActivityContent from '@/components/ActivityContent'
-import Map from '@/components/Map'
+import TheMap from '@/components/TheMap.vue'
 import { db, dbAuth } from '@/db'
 import ShareModal from '@/components/ShareModal'
 import { latlngToObject, adjectiveAnimal } from '@/utils'
@@ -71,7 +71,7 @@ export default {
   name: 'Activities',
   components: {
     ShareModal,
-    Map,
+    TheMap,
     ListItem,
     FontAwesomeIcon,
     InfiniteLoading,

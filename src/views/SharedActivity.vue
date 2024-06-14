@@ -34,21 +34,21 @@
     </section>
     <div class="container">
       <div class="box">
-        <Map :latlng="latLngArray" />
+        <TheMap :latlng="latLngArray" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Map from '@/components/Map'
+import TheMap from '@/components/TheMap.vue'
 import { dbAuth } from '@/db'
 import {latLngToArray} from "@/utils"
 
 export default {
   name: 'SharedActivity',
   components: {
-    Map,
+    TheMap,
   },
   props: {
     activity: {

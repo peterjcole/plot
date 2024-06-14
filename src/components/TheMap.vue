@@ -34,6 +34,17 @@ export default {
       locateLayer: null,
     }
   },
+  computed: {
+    isIOSDevice() {
+      return (
+        ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+          navigator.platform
+        ) ||
+        // iPad on iOS 13 detection
+        (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+      )
+    },
+  },
   watch: {
     latlng() {
       this.onLatlngChange()
@@ -134,17 +145,6 @@ export default {
         }).addTo(this.map)
         this.locateLayer.addTo(this.map)
       }
-    },
-  },
-  computed: {
-    isIOSDevice() {
-      return (
-        ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
-          navigator.platform
-        ) ||
-        // iPad on iOS 13 detection
-        (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-      )
     },
   },
 }

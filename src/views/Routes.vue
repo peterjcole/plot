@@ -39,7 +39,7 @@
         </div>
         <div class="column">
           <div class="box map">
-            <Map :latlng="selectedLatlng" />
+            <TheMap :latlng="selectedLatlng" />
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import InfiniteLoading from 'vue-infinite-loading'
 
 import {mutations, store} from "@/store"
-import Map from '@/components/Map'
+import TheMap from '@/components/TheMap.vue'
 import ListItem from '@/components/ListItem'
 import RouteContent from "@/components/RouteContent"
 
@@ -63,7 +63,7 @@ export default {
   components: {
     InfiniteLoading,
     FontAwesomeIcon,
-    Map,
+    TheMap,
     ListItem,
     RouteContent
   },

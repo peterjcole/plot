@@ -14,7 +14,7 @@
       <div class="columns is-gapless">
         <div class="column">
           <div class="box plan-map">
-            <Map ref="map" />
+            <TheMap ref="map" />
           </div>
         </div>
       </div>
@@ -23,12 +23,12 @@
 </template>
 
 <script>
-import Map from '@/components/OpenLayersMap'
+import TheMap from '@/components/OpenLayersMap'
 
 export default {
   name: 'Plan',
   components: {
-    Map,
+    TheMap,
   },
   beforeRouteLeave (to, from, next) {
     console.log('before route leave')
