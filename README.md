@@ -1,3 +1,9 @@
+> [!NOTE]  
+> Now deprecated, replaced with a rewritten version: https://github.com/peterjcole/plot-v2
+
+
+
+
 # plot
 > View, and share, your Strava Activities on an [Ordnance Survey Explorer 1:25000 map](https://shop.ordnancesurvey.co.uk/mapsheetfinder.html#choosing) (UK only)
 
